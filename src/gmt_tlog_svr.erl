@@ -67,7 +67,7 @@ tlog() ->
 tlog(Event) ->
     tlog(Event, now()).
 
-tlog(Event, Now) when is_record(Event, tlog_core) ->
+tlog(#tlog_core{}=Event, Now) ->
     case get(?TLOG_KEY_PRINT) of
         true ->
             ok;
@@ -87,7 +87,7 @@ tlog(Event, Now) when is_record(Event, tlog_core) ->
 
 
 %% interfaces with process dictionary
-tlog_put(Event) when is_record(Event, tlog_core) ->
+tlog_put(#tlog_core{}=Event) ->
     put(?TLOG_KEY_EVENT, Event).
 
 tlog_add(#tlog_core{extras=New}=Event) ->

@@ -403,28 +403,20 @@ get_config_value_from_dict(Name, Default, Dict) when is_atom(Name) ->
 get_config_value_from_dict(Name, Default, Dict) when is_list(Name) ->
     get_config_value_from_dict(list_to_atom(Name), Default, Dict).
 
-
-
 %% @spec (atom() | string(), integer() | string(), dict()) -> {ok, integer()} | {error, Reason}
 get_config_value_i_from_dict(Name, Default, Dict) ->
-    case get_config_value_from_dict(Name, Default, Dict) of
-        {ok, Value} ->
-            {ok, gmt_util:int_ify(Value)}
-    end.
+    {ok, Value} = get_config_value_from_dict(Name, Default, Dict),
+    {ok, gmt_util:int_ify(Value)}.
 
 %% @spec (atom() | string(), integer() | string(), dict()) -> {ok, float()} | {error, Reason}
 get_config_value_float_from_dict(Name, Default, Dict) ->
-    case get_config_value_from_dict(Name, Default, Dict) of
-        {ok, Value} ->
-            {ok, gmt_util:float_ify(Value)}
-    end.
+    {ok, Value} = get_config_value_from_dict(Name, Default, Dict),
+    {ok, gmt_util:float_ify(Value)}.
 
 %% @spec (atom() | string(), integer() | string(), dict()) -> {ok, bool()} | {error, Reason}
 get_config_value_boolean_from_dict(Name, Default, Dict) ->
-    case get_config_value_from_dict(Name, Default, Dict) of
-        {ok, Value} ->
-            {ok, gmt_util:boolean_ify(Value)}
-    end.
+    {ok, Value} = get_config_value_from_dict(Name, Default, Dict),
+    {ok, gmt_util:boolean_ify(Value)}.
 
 %% @spec (atom(), term(), dict()) -> {ok, string()}
 get_config_value_term_from_dict(Name, Default, Dict) ->
@@ -447,24 +439,18 @@ get_config_value_term_from_dict(Name, Default, Dict) ->
 
 %% @spec (atom() | string(), integer() | string(), dict()) -> {ok, atom()} | {error, Reason}
 get_config_value_atom_from_dict(Name, Default, Dict) ->
-    case get_config_value_from_dict(Name, Default, Dict) of
-        {ok, Value} ->
-            {ok, gmt_util:atom_ify(Value)}
-    end.
+    {ok, Value} = get_config_value_from_dict(Name, Default, Dict),
+    {ok, gmt_util:atom_ify(Value)}.
 
 %% @spec (atom(), string(), dict()) -> {ok, string()}
 get_config_value_timeout_from_dict(Name, Default, Dict) ->
-    case get_config_value_from_dict(Name, Default, Dict) of
-        {ok, Value} ->
-            {ok, gmt_util:timeout_ify(Value)}
-    end.
+    {ok, Value} = get_config_value_from_dict(Name, Default, Dict),
+    {ok, gmt_util:timeout_ify(Value)}.
 
 %% @spec (atom(), string(), dict()) -> {ok, string()}
 get_config_value_timeoutsec_from_dict(Name, Default, Dict) ->
-    case get_config_value_from_dict(Name, Default, Dict) of
-        {ok, Value} ->
-            {ok, gmt_util:timeoutsec_ify(Value)}
-    end.
+    {ok, Value} = get_config_value_from_dict(Name, Default, Dict),
+    {ok, gmt_util:timeoutsec_ify(Value)}.
 
 
 %%----------------------------------------------------------------------

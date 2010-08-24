@@ -650,8 +650,8 @@ valid_timezone(TzStr) ->
                   {"YST", "-0900"},
                   {"Z", "-0000"},
                   {"z", "-0000"}],
-    case lists:keysearch(TzStr, 1, ZoneList) of
-        {value, {TzStr, Int}} ->
+    case lists:keyfind(TzStr, 1, ZoneList) of
+        {TzStr, Int} ->
             Int;
         _   ->
             bad_date
@@ -757,12 +757,12 @@ gentime_to_gregs(T) when is_list(T) ->
 gentime_to_gregs(<<YYYY:4/binary, MMo:2/binary, DD:2/binary,
                   HH:2/binary, MMi:2/binary, SS:2/binary,
                   X/binary>> = B)
-  when size(B) =:= 17, X =:= <<".0Z">> ->
+  when byte_size(B) =:= 17, X =:= <<".0Z">> ->
     gentime_to_gregs2(YYYY, MMo, DD, HH, MMi, SS);
 gentime_to_gregs(<<YYYY:4/binary, MMo:2/binary, DD:2/binary,
                   HH:2/binary, MMi:2/binary, SS:2/binary,
                   X/binary>> = B)
-  when size(B) =:= 15, X =:= <<"Z">> ->
+  when byte_size(B) =:= 15, X =:= <<"Z">> ->
     gentime_to_gregs2(YYYY, MMo, DD, HH, MMi, SS).
 
 gentime_to_gregs2(YYYY, MMo, DD, HH, MMi, SS) ->
@@ -1056,12 +1056,7 @@ global_timestamp_cmp({Now2, Node2}, {Now1, Node1}) ->
 %% @spec (Ts2::term(), Ts1::term()) -> true | false
 %% @doc less two global timestamps
 global_timestamp_less(Ts2, Ts1) ->
-    Cmp = global_timestamp_cmp(Ts2, Ts1),
-    if Cmp =:= -1 ->
-            true;
-       true ->
-            false
-    end.
+    global_timestamp_cmp(Ts2, Ts1) =:= -1.
 
 %% @spec () -> binary()
 %% @doc construct a global timestamp and encode as binary with no

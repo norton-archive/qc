@@ -145,9 +145,9 @@ get_config_value(Path, Name, Default) ->
 get_config_value(Path, Name, Default, Namespace) ->
     case read_kv_config_file(Path, Namespace) of
         {ok, ConfList} ->
-            case lists:keysearch(Name, 1, ConfList) of
-                {value, {_, Val}} -> Val;
-                _                 -> Default
+            case lists:keyfind(Name, 1, ConfList) of
+                {_, Val} -> Val;
+                _        -> Default
             end;
         _ ->
             Default

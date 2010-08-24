@@ -78,12 +78,12 @@
 -spec cal_to_bignumstr() -> string().
 -spec combinations(list()) -> [any()].
 -spec get_attrib_pos(atom(), atom(), integer() | atom()) -> integer().
--spec int_ify(binary() | [byte()] | integer()) -> integer().
+-spec int_ify(binary() | [byte()] | number()) -> integer().
 -spec int_to_enum_char(integer(), [any()]) -> string().
 -spec io_list_len(binary() | list() | non_neg_integer()) -> number().
 -spec join(list(), list() | char()) -> list().
 -spec left_pad(string(), integer(), char()) -> string().
--spec list_ify(atom() | binary() | list() | integer() | tuple() | reference()) -> list().
+-spec list_ify(atom() | binary() | list() | integer() | tuple() | pid() | reference()) -> string().
 -spec list_unique(list()) -> list().
 -spec list_unique_u(list()) -> list().
 -spec make_monitor(pid() | {atom(), atom()}) -> 'error' | {'ok',reference()}.
@@ -95,8 +95,8 @@
 -spec set_alarm(any(), any(), any()) -> 'ok'.
 -spec set_alarm(any(), any(), any(),list()) -> 'ok'.
 -spec split_bin_on_char(binary(), integer()) -> [binary()].
--spec timeout_ify('infinity' | binary() | string() | integer()) -> 'infinity' | non_neg_integer().
--spec timeoutsec_ify('infinity' | binary() | string | integer()) -> 'infinity' | non_neg_integer().
+-spec timeout_ify(binary() | string() | timeout()) -> timeout().
+-spec timeoutsec_ify(binary() | string() | timeout()) -> timeout().
 
 
 %% @spec url_encode(Str::string())
@@ -345,10 +345,10 @@ int_infinity_compare(A, B) when is_integer(A) and is_integer(B)->
 %% @doc Return a random member of tuple T.
 
 random_item(T) when is_tuple(T) ->
-    N = random:uniform(size(T) - 1) + 1,
+    N = random:uniform(tuple_size(T) - 1) + 1,
     element(N, T).
 
-%% @spec timeout_ify(X::term()) -> integer() | infinity
+%% @spec timeout_ify(X::term()) -> timeout()
 %% @doc Convert a term to an integer or the atom 'infinity' (if convertable).
 
 timeout_ify(infinity) ->
@@ -431,8 +431,8 @@ enum_char_to_int(V, EList) ->
                 _    -> throw({bad_enum, list_ify(V), EList})
             end;
         S ->                                    % Multi char string
-            case lists:keysearch(S, 1, EList) of
-                {value, {S, Int}} -> Int;
+            case lists:keyfind(S, 1, EList) of
+                {S, Int} -> Int;
                 _   -> throw({bad_enum, list_ify(V), EList})
             end
     end.
@@ -443,9 +443,9 @@ enum_char_to_int(V, EList) ->
 int_to_enum_char(Int, EList) ->
     case lists:member(Int, EList) of
         true -> [Int];                          % Char -> string
-        _    -> case lists:keysearch(Int, 2, EList) of
-                    {value, {Str, Int}} -> Str;
-                    _                   -> throw({bad_enum, Int, EList})
+        _    -> case lists:keyfind(Int, 2, EList) of
+                    {Str, Int} -> Str;
+                    _          -> throw({bad_enum, Int, EList})
                 end
     end.
 
@@ -457,8 +457,8 @@ get_attrib_pos(_Mod, _Table, Attrib) when is_integer(Attrib) ->
     Attrib;
 get_attrib_pos(Mod, Table, Attrib) ->
     FmtList = Mod:get_rec_fmtlist(Table),
-    case lists:keysearch(Attrib, 1, FmtList) of
-        {value, {_, Pos, _}} ->
+    case lists:keyfind(Attrib, 1, FmtList) of
+        {_, Pos, _} ->
             Pos;
         _ ->
             throw({error, get_attrib_pos,
@@ -486,11 +486,10 @@ make_edoc_documentation() ->
 
 make_edoc_documentation([ApplicationName]) ->
     {ok, CurrentDir} = file:get_cwd(),
-
-    file:set_cwd(".."),
+    ok = file:set_cwd(".."),
     {ok, Up1Path} = file:get_cwd(),
     LastDir = filename:basename(Up1Path),
-    file:set_cwd(".."),
+    ok = file:set_cwd(".."),
     Options = [{new, true}, {hidden, true}, {private, true}, {todo, true}],
     Res =
         if ApplicationName =/= undefined ->
@@ -499,7 +498,7 @@ make_edoc_documentation([ApplicationName]) ->
                 edoc:application(atom_ify(LastDir), LastDir, Options)
         end,
 
-    file:set_cwd(CurrentDir),
+    ok = file:set_cwd(CurrentDir),
     Res.
 
 %% @spec (File::filename()) -> {ok, term()} | {error, term()}
@@ -664,7 +663,7 @@ prune_term(Term, MaxSize, Acc) when is_list(Term) ->
 prune_term(Term, MaxSize, Acc) when is_tuple(Term) ->
     {Acc2, MaxSize2} = prune_term_list(tuple_to_list(Term), MaxSize - 1, []),
     {['%StartTuple', Acc2, '%EndTuple'|Acc], MaxSize2};
-prune_term(Term, MaxSize, Acc) when is_binary(Term), size(Term) > 48 ->
+prune_term(Term, MaxSize, Acc) when byte_size(Term) > 48 ->
     {SubBin, _} = split_binary(Term, 48),
     NewBin = list_to_binary([SubBin, "[...]"]),
     {[NewBin|Acc], MaxSize - 1};
@@ -850,10 +849,7 @@ alarm_set_p(Name) ->
 %% @doc Check if alarm <tt>Name</tt> is set, give a list of alarms.
 
 alarm_set_p(Name, AlarmList) ->
-    case lists:keysearch(Name, 1, AlarmList) of
-        false -> false;
-        _     -> true
-    end.
+    lists:keymember(Name, 1, AlarmList).
 
 %% @spec (server_spec()) -> {ok, monitor_ref()} | error
 %% @doc Simplify the arcane art of <tt>erlang:monitor/1</tt>:
@@ -1068,10 +1064,7 @@ find_base_directory(Module) ->
 
 extension() ->
     %% erlang:info(machine) returns machine name as text in all uppercase
-    "." ++ lists:map(fun(X) ->
-                             X + $a - $A
-                     end,
-                     erlang:system_info(machine)).
+    "." ++ [X + $a - $A || X <- erlang:system_info(machine)].
 
 
 wait_for_processes(Procs) when is_list(Procs) ->
@@ -1117,26 +1110,25 @@ wait_for_processes_loop(From, Procs) ->
     From ! {From, self(), Res},
     exit(normal).
 
-wait_for_loop([H|T]) ->
+wait_for_loop([H|T]=L) ->
     case whereis(H) of
         undefined ->
             timer:sleep(500),
-            wait_for_loop([H|T]);
+            wait_for_loop(L);
         Else ->
             case process_info(Else, status) of
                 {status, _Status} ->
                     wait_for_loop(T);
                 _ ->
                     timer:sleep(500),
-                    wait_for_loop([H|T])
+                    wait_for_loop(L)
             end
     end;
-
 wait_for_loop([]) ->
     ok.
 
 io_list_len(B) when is_binary(B) ->
-    size(B);
+    byte_size(B);
 io_list_len(L) when is_list(L) ->
     lists:foldl(fun(X, Len) -> Len + io_list_len(X) end, 0, L);
 io_list_len(C) when C >= 0; C =< 255 ->
@@ -1192,15 +1184,13 @@ keyfindIgnoreCase_int(KeyLower, N, TupleList) ->
     case TupleList of
         [] ->
             false;
-
-        [H | T] when is_tuple(H), size(H) >= N, is_list(element(N, H)) ->
+        [H | T] when tuple_size(H) >= N, is_list(element(N, H)) ->
             case string:to_lower(element(N, H)) of
                 KeyLower ->
                     H;
                 _ ->
                     keyfindIgnoreCase_int(KeyLower, N, T)
             end;
-
         [_ | T] ->
             keyfindIgnoreCase_int(KeyLower, N, T)
     end.
@@ -1274,12 +1264,7 @@ global_reference_cmp({Ref2, Node2}, {Ref1, Node1}) ->
 %% @spec (Gr2::term(), Gr1::term()) -> true | false
 %% @doc less two global references
 global_reference_less(Gr2, Gr1) ->
-    Cmp = global_reference_cmp(Gr2, Gr1),
-    if Cmp =:= -1 ->
-            true;
-       true ->
-            false
-    end.
+    global_reference_cmp(Gr2, Gr1) =:= -1.
 
 %% @spec () -> binary()
 %% @doc construct a global reference and encode as binary with no

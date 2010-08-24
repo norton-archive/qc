@@ -79,7 +79,7 @@ server_loop(S) ->
     Line = binary_to_list(gmt_util:chomp_bin(get_line(S))),
     Ws = string:tokens(Line, " "),
     try begin
-            if length(Ws) =/= 0 ->
+            if Ws =/= [] ->
                     case hd(Ws) of
                         X when X =:= "exit"; X =:= "logout"; X =:= "quit"; X =:= "q" ->
                             send_nl(S, "Goodbye!"),
@@ -96,7 +96,7 @@ server_loop(S) ->
                             Fun = gmt_util:atom_ify(Cmd),
                             Args = tl(Ws),
                             ?APPLOG_DEBUG("MFA=~p/~p/~p", [Module,Fun,Args]),
-                            {ok, Message} = apply(Module, Fun, [Args,S]),
+                            {ok, Message} = Module:Fun(Args, S),
                             send_nl(S, Message),
                             server_loop(S)
                     end;
@@ -183,8 +183,8 @@ get_line(S) ->
 %% common commands %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
 show(["nodes"|WordList],_S) ->
     Nodes = mnesia:system_info(running_db_nodes),
-    case length(WordList) of
-        0 ->
+    case WordList of
+        [] ->
             %% show all nodes
             {ok, [ ["\n", atom_to_list(N)] || N <- Nodes]};
         _ ->
@@ -196,8 +196,8 @@ show(["nodes"|WordList],_S) ->
             end
     end;
 show(["tables"|WordList],_S) ->
-    case length(WordList) of
-        0 ->
+    case WordList of
+        [] ->
             {ok, [print_table_headers(),
                   [show_table(T)||T <- cli_tables()]]};
         _ ->
@@ -272,7 +272,7 @@ cli_tables() ->
 
 ubf_servers() ->
     {ok, UBFServers} = gmt_config_svr:get_config_value(cli_ubf_servers, ""),
-    lists:map(fun(X) -> gmt_util:atom_ify(X) end, string:tokens(UBFServers," ")).
+    [gmt_util:atom_ify(X) || X <- string:tokens(UBFServers," ")].
 show_ubf(Server) ->
     case catch proc_socket_server:server_status(Server) of
         {Num, Max} when is_integer(Num) andalso is_integer(Max) ->

@@ -457,18 +457,18 @@ do_generic_event(Event, State) ->
 
     %% only output events that don't make it to the app log
     State2 = case (catch write_to_app_log(State, S)) of
-                 St when is_record(St, state) ->
+                 #state{} = St ->
                      St;
                  X ->
                      io:format("X ~p\n", [X]),
- if Code7 =:= ?CODE7_DEFAULT ->
-                              noop;
-                         true                    ->
-                              io:put_chars("-->"),
-                              io:format("~P", [X, 30]),
-                              io:put_chars("<--\n")
-                      end,
-                      State
+		     if Code7 =:= ?CODE7_DEFAULT ->
+			     noop;
+			true                    ->
+			     io:put_chars("-->"),
+			     io:format("~P", [X, 30]),
+			     io:put_chars("<--\n")
+		     end,
+		     State
              end,
 
     %% Do what the error_logger_tty_h handler does, sortof.  Make it
@@ -513,7 +513,7 @@ format_event({_T, _GL, {_Pid, gmt_event_errt, E}}) when is_record(E, errt) ->
     end;
 format_event({T, _GL, {_Pid, Format, Data}})
   when T =:= error; T =:= warning_msg; T =:= info_msg ->
-    Size = size(term_to_binary(Data)),  % Drat, I hate to do this, but......
+    Size = byte_size(term_to_binary(Data)),  % Drat, I hate to do this, but...
     if Size =< 10*1000 ->
             case (catch lists:flatten(io_lib:format(Format, Data))) of
                 {'EXIT', _} ->
@@ -624,12 +624,7 @@ precheck_loglevel(Severity) ->
                end,
     IntLogLevel = severity2syslog(LogLevel),
     IntSeverity = severity2syslog(Severity),
-    if IntLogLevel >= IntSeverity ->
-            true;
-       true ->
-            false
-    end.
-
+    IntLogLevel >= IntSeverity.
 
 unformat_twiddle_p(S) ->
     Lines = string:tokens(S, "\r\n"),
@@ -676,7 +671,7 @@ shrink(L, MaxLen) when is_list(L) ->
 shrink(T, MaxLen) when is_tuple(T) ->
     list_to_tuple(shrink(tuple_to_list(T), MaxLen));
 shrink(B, MaxLen) when is_binary(B) ->
-    if size(B) > MaxLen ->
+    if byte_size(B) > MaxLen ->
             <<Prefix:MaxLen/binary, _/binary>> = B,
             list_to_binary([Prefix, "...truncated."]);
        true ->

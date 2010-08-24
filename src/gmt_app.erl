@@ -43,9 +43,9 @@ start(Type, StartArgs) ->
     gmt_event_h:start_singleton_report_handler(?MODULE, Type, StartArgs),
     catch gmt_cinfo_basic:register(),
     case gmt_sup:start_link(StartArgs) of
-        {ok, Pid} ->
+        {ok, Pid} = Ok ->
             io:format("QQQ: ~s:start ok Pid = ~p\n", [?MODULE, Pid]),
-            {ok, Pid};
+            Ok;
         Error ->
             io:format("QQQ: ~s:start bummer: ~p\n", [?MODULE, Error]),
             Error
