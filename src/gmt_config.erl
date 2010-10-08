@@ -43,16 +43,22 @@
 %% @doc Return central config file path, using a default if env is unspecified.
 
 get_config_file_path() ->
-    case init:get_argument(central_config) of
-        {ok, [[Path]]} -> Path;
-        _              -> throw({no_init_arg_defined, central_config})
+    case get_central_config_arg() of
+        {ok, Path} -> Path;
+        _          -> throw({no_init_arg_defined, central_config})
     end.
 
 get_config_dir() ->
-    case init:get_argument(central_config) of
-        {ok, [[Path]]} -> drop_central_config(Path);
-        _              -> throw({no_init_arg_defined, central_config})
+    case get_central_config_arg() of
+        {ok, Path} -> drop_central_config(Path);
+        _          -> throw({no_init_arg_defined, central_config})
     end.
+
+get_central_config_arg() ->
+    case init:get_argument(central_config) of
+        {ok, [[Path]]} -> {ok, Path};
+        _              -> application:get_env(gmt, central_config)
+    end.    
 
 drop_central_config(Path) ->
     string:substr(Path, 1, string:str(Path, "/central.conf")).
