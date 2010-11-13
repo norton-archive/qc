@@ -40,6 +40,7 @@ MODULES1 = \
 PRIVS = \
 
 TESTS = \
+	gmt_charset_SUITE \
 	gmt_config_svr_SUITE \
 	gmt_time_SUITE
 
@@ -52,6 +53,7 @@ include $(shell cat ../.depends-gmt-bom)/make/erl_make.mk
 check: all
 	-rm -f ./*.log
 	$(RUNAPP1) -noinput -noshell -pz $(TEST_DIR) \
+		-s gmt_charset_SUITE start_test \
 		-s gmt_config_svr_SUITE start_test \
 		-s gmt_time_SUITE start_test \
 		-s erlang halt \
