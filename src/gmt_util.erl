@@ -531,12 +531,12 @@ node_localid() ->
 %% @doc Determine node's local id based on node's sname
 
 node_localid(SName) ->
-    case regexp:matches(SName, "_[0-9]+$") of
+    case re:run(SName, "_[0-9]+$") of
         {match,[]} ->
-                               0;
-                            {match,[{Start,Length}]} ->
-                               int_ify(string:substr(SName, Start+1, Length))
-                       end.
+            0;
+        {match,[{Start,Length}]} ->
+            int_ify(string:substr(SName, Start+1, Length))
+    end.
 
 %% @spec (integer()) -> integer()
 %% @doc Determine node's local port based on node's local id

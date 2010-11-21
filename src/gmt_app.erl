@@ -55,8 +55,8 @@ start(Type, StartArgs) ->
 %% Func: stop/1
 %% Returns: any
 %%----------------------------------------------------------------------
-stop(State) ->
-    ?APPLOG_DEBUG("stop: ~p", [State]),
+stop(_State) ->
+    ?APPLOG_DEBUG("stop: ~p", [_State]),
     ok.
 
 %%%----------------------------------------------------------------------
