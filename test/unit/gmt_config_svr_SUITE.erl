@@ -34,7 +34,7 @@
 do_setup() ->
     ok = application:set_env(gmt, central_config, "../priv/central.conf"),
     [ ok = application:start(A) || A <- [sasl, gmt] ],
-    ok = ?MUT:reload_config("../test/Unit-Test-Files/test1.config"),
+    ok = ?MUT:reload_config("../test/unit/test1.config"),
     ok.
 
 do_teardown() ->
