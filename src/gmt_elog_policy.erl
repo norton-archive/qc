@@ -20,70 +20,76 @@
 %%%
 %%% @doc A lightweight event logging policy implementation.
 %%%
-%%% The emphasis of this module is <em>lightweight</em>.  The enabled()
-%%% function may be called tens of thousands of times per second.
+%%% The emphasis of this module is <em>lightweight</em>.  The
+%%% enabled() function may be called tens of thousands of times per
+%%% second.
 %%%
-%%% The use of the 4 arguments to enabled can be free-form, since
-%%% this entire module will be replaced whenever tracing is desired.
+%%% The use of the 4 arguments to enabled can be free-form, since this
+%%% entire module will be replaced whenever tracing is desired.
 %%% However, it's strongly recommended that the following conventions
 %%% be used:
 %%%
 %%% <ul>
-%%% <li> <b>Priority</b>: integer() between ?LOG_EMERG_PRI (0) and
-%%%      ?LOG_DEBUG_PRI (7). </li>
-%%% <li> <b>Category</b>: atom() </li>
-%%% <li> <b>Module</b>: atom() </li>
+%%% <li> <b>Level</b>: error | warning | info | debug </li>
+%%% <li> <b>Category</b>: term() </li>
+%%% <li> <b>Module</b>: module() </li>
 %%% <li> <b>Line</b>: integer() </li>
 %%% </ul>
 %%%
 
 -module(gmt_elog_policy).
 
--include("gmt_applog.hrl").
-
+%% API
 -export([enabled/6]).
--export([test_c/6, test_e/6, test_e_setup/0]).
 
+%%%===================================================================
+%%% API
+%%%===================================================================
 
--spec(enabled/6 :: (term(), term(), atom(), integer(), string(), list()) ->
-             'true' | 'false' ).
+%%--------------------------------------------------------------------
+%% @doc Fixture for event logging and event tracing. Returns true if
+%% event was reported to event_logger.  Otherwise, returns false.
+%%--------------------------------------------------------------------
 
+-type log_level() :: 'error' | 'warning' | 'info' | 'debug'.
 
-enabled(Priority, _Category, _Module, _Line, _Fmt, _ArgList)
-  when Priority =< ?LOG_INFO_PRI ->
-    true;
-enabled(_Priority, _Category, _Module, _Line, _Fmt, _ArgList) ->
-    false.
+-spec enabled(log_level(), term(), module(), integer(), string(), list())
+             -> 'true' | 'false'.
 
-%% Functions for experimentation only.
-
-test_c(_Priority, _Category, _Module, _Line, _Fmt, _ArgList) ->
-    false.
-
-%% My laptop, CPU clock fixed at 1.33GHz, non-SMP VM, says:
-%%
-%% timer:tc(gmt_elog, test_iter, [0, 88999000])    -> {12925467,ok}
-%% timer:tc(gmt_elog, test_iter_c, [0, 88999000])  -> {10012760,ok}
-%% timer:tc(gmt_elog, test_iter_e, [0, 88999000])  -> {43373826,ok}
-%%
-%% The enabled() func is 3.4x faster than test_e() when test_e()'s
-%% public table exists and contains the single tuple {test_e, 5}.
-%%
-%% If the public named table does not exist, test_e() is 25.6x slower
-%% than enabled()!
-%% If the public named table exists and is empty, test_e() is 2.2x slower
-%% than enabled().
-
-test_e(Priority, _Category, _Module, _Line, _Fmt, _ArgList) ->
-    case (catch ets:lookup(goofus, test_e)) of
-        [{test_e, Limit}] ->
-            Priority =< Limit;
-        _ ->
+enabled(error, _Category, Module, Line, Fmt, Args) ->
+    case application:get_env(gmt, application_evt_log_level) of
+        {ok, Level} when Level == info; Level == warning; Level == error ->
+            Report = report(Module, Line, Fmt, Args),
+            ok = error_logger:error_report(gmt, Report),
+            true;
+        {ok, _Level} ->
             false
-    end.
+    end;
+enabled(warning, _Category, Module, Line, Fmt, Args) ->
+    case application:get_env(gmt, application_evt_log_level) of
+        {ok, Level} when Level == info; Level == warning ->
+            Report = report(Module, Line, Fmt, Args),
+            ok = error_logger:warning_report(gmt, Report),
+            true;
+        {ok, _Level} ->
+            false
+    end;
+enabled(info, _Category, Module, Line, Fmt, Args) ->
+    case application:get_env(gmt, application_evt_log_level) of
+        {ok, Level} when Level == info ->
+            Report = report(Module, Line, Fmt, Args),
+            ok = error_logger:info_report(gmt, Report),
+            true;
+        {ok, _Level} ->
+            false
+    end;
+enabled(_Level, _Category, _Module, _Line, _Fmt, _Args) ->
+    false.
 
-test_e_setup() ->
-    spawn(fun() ->
-                  ets:new(goofus, [public, named_table]),
-                  receive goofus -> goofus end
-          end).
+%%%===================================================================
+%%% Internal functions
+%%%===================================================================
+
+report(Module, Line, Fmt, Args) ->
+    Msg = lists:flatten(io_lib:format(Fmt, Args)),
+    [{module, Module}, {line, Line}, {msg, Msg}].

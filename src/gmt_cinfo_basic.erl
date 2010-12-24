@@ -28,7 +28,6 @@
 %% Export in case anyone else thinks they might be useful.
 -export([alarm_info/1, application_info/1,
          capture_ets_i/1, capture_net_kernel_i/1, nodes_info/1, capture_regs/1,
-         central_conf/1,
          erlang_memory/1, erlang_statistics/1,
          erlang_system_info/1, global_summary/1, inet_db_summary/1,
          loaded_modules/1, memory_hogs/2, non_zero_mailboxes/1, port_info/1,
@@ -58,7 +57,6 @@ cluster_info_generator_funs() ->
      {"net_kernel summary", fun capture_net_kernel_i/1},
      {"inet_db summary", fun inet_db_summary/1},
      {"Global summary", fun global_summary/1},
-     {"Application config (central.conf)", fun central_conf/1},
 
      %% Longer output starts here.
      {"erlang:system_info() summary", fun erlang_system_info/1},
@@ -97,10 +95,6 @@ capture_regs(C) ->
     %% Use the captured IO as the format string: it has \n embedded.
     cluster_info:format(
       C, cluster_info:capture_io(1000, fun() -> shell_default:regs() end)).
-
-central_conf(C) ->
-    {ok, Config} = file:read_file(gmt_config_svr:get_config_path()),
-    cluster_info:send(C, ["\n", Config, "\n"]).
 
 erlang_memory(C) ->
     cluster_info:format(C, " ~p\n", [erlang:memory()]).

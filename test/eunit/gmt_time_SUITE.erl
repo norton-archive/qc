@@ -19,12 +19,7 @@
 
 -module(gmt_time_SUITE).
 
-%% Test cases
--export([start_test/0
-         , start_2_000_test/0
-         , start_3_000_test/0
-         , start_4_000_test/0
-        ]).
+-include_lib("eunit/include/eunit.hrl").
 
 -define(MUT, gmt_time). % Module Under Test (a.k.a. DUT)
 -define(ATM, ?MODULE). % Automatic Test Module (a.k.a. ATE)
@@ -33,11 +28,6 @@
 %%
 %% Test Cases
 %%
-start_test() ->
-    ok = start_2_000_test(),
-    ok = start_3_000_test(),
-    ok = start_4_000_test(),
-    ok.
 
 start_2_000_test() ->
     %%

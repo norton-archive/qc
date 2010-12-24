@@ -21,6 +21,7 @@
 -behaviour(gen_server).
 
 -include("gmt_tlog_svr.hrl").
+-include("gmt_elog.hrl").
 
 -export([start_link/0]).
 
@@ -124,19 +125,17 @@ tlog_duration(StartTime, Now) ->
 %% gen_server callbacks --------------------------------------------------
 
 init(_) ->
-    {ok, Filename} = gmt_config_svr:get_config_value(?TLOG_CONFIG_PATH, "/dev/null"),
+    {ok, Filename} = application:get_env(gmt, ?TLOG_CONFIG_PATH),
     {ok, do_open(#state{filename=Filename})}.
 
 handle_call(reopen, _From, State) ->
     {reply, ok, do_reopen(State)};
 handle_call(Msg, _From, State) ->
-    error_logger:error_msg("~s:handle_call: ~p: got call ~P\n",
-                           [?MODULE, self(), Msg, 20]),
+    ?ELOG_ERROR("~p: got call ~P\n", [self(), Msg, 20]),
     {reply, ok, State}.
 
 handle_cast(Msg, State) ->
-    error_logger:error_msg("~s:handle_cast: ~p: got cast ~P\n",
-                           [?MODULE, self(), Msg, 20]),
+    ?ELOG_ERROR("~p: got cast ~P\n", [self(), Msg, 20]),
     {noreply, State}.
 
 handle_info({fevent, FEvent}, #state{fd=Fd,flush=Flush,acc=Acc,acclen=AccLen}=State)
@@ -149,8 +148,7 @@ handle_info({fevent, FEvent}, #state{fd=Fd,flush=Flush,acc=Acc,acclen=AccLen}=St
             {noreply, State#state{acc=[],acclen=0}}
     end;
 handle_info(Info, State) ->
-    error_logger:error_msg("~s:handle_info: ~p: got info ~P\n",
-                           [?MODULE, self(), Info, 20]),
+    ?ELOG_ERROR("~p: got info ~P\n", [self(), Info, 20]),
     {noreply, State}.
 
 code_change(_OldVsn, State, _Extra) ->
@@ -169,7 +167,7 @@ do_reopen(#state{fd=Fd,acc=Acc}=State) ->
     do_open(do_close(State#state{acc=[],acclen=0})).
 
 do_open(#state{filename=Filename}=State) ->
-    {ok, Flush} = gmt_config_svr:get_config_value_i(?TLOG_CONFIG_FLUSH, 0),
+    {ok, Flush} = application:get_env(gmt, ?TLOG_CONFIG_FLUSH),
     case file:open(Filename, [append,raw,binary,delayed_write]) of
         {ok, Fd} ->
             State#state{fd=Fd,flush=Flush};

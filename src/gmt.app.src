@@ -29,13 +29,9 @@
   {modules, [gmt_app
              , gmt_charset
              , gmt_cinfo_basic
-             , gmt_cli
-             , gmt_config
-             , gmt_config_svr
-             , gmt_elog
              , gmt_elog_policy
-             , gmt_event_h
              , gmt_loop
+             , gmt_otp
              , gmt_parallel_limit
              , gmt_pmap
              , gmt_sup
@@ -43,6 +39,12 @@
              , gmt_time
              , gmt_tlog_svr
              , gmt_util
-            ]}
- ]
-}.
+            ]},
+  {env, [{application_evt_log_level, warning}
+         , {application_tx_log_flush, 0}
+         , {application_tx_log_path, "/dev/null"}
+         , {sysmon_large_heap, 10485760}
+         , {sysmon_long_gc, 50}
+         , {sysmon_max_per_second, 20}
+        ]}
+ ]}.

@@ -21,8 +21,6 @@
 
 -behaviour(application).
 
--include("applog.hrl").
-
 %% application callbacks
 -export([start/0, start/2, stop/1]).
 
@@ -37,10 +35,9 @@
 %%          {error, Reason}
 %%----------------------------------------------------------------------
 start() ->
-    start(xxxwhocares, []).
+    start(normal, []).
 
-start(Type, StartArgs) ->
-    gmt_event_h:start_singleton_report_handler(?MODULE, Type, StartArgs),
+start(_Type, StartArgs) ->
     catch gmt_cinfo_basic:register(),
     case gmt_sup:start_link(StartArgs) of
         {ok, Pid} = Ok ->
@@ -56,7 +53,6 @@ start(Type, StartArgs) ->
 %% Returns: any
 %%----------------------------------------------------------------------
 stop(_State) ->
-    ?APPLOG_DEBUG("stop: ~p", [_State]),
     ok.
 
 %%%----------------------------------------------------------------------

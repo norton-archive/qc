@@ -6,23 +6,12 @@
 
 -module(gmt_charset_SUITE).
 
--export([start_test/0]).
+-include_lib("eunit/include/eunit.hrl").
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
 %% Test Cases
 %%
--spec start_test() -> ok.
-start_test() ->
-    ok = start_1_000_test(),
-    ok = start_2_000_test(),
-    ok = start_3_000_test(),
-    ok = start_4_000_test(),
-    ok = start_5_000_test(),
-    ok = start_6_000_test(),
-    ok = start_7_000_test(),
-    ok = start_8_000_test(),
-    ok.
 
 start_1_000_test() ->
     %% valid8 on empty binaries
@@ -133,7 +122,7 @@ start_7_000_test() ->
 
     %% Japanese (in shift_jis) ; 34 bytes; 7x7bit; 17x8bit; 5xutf-8
     {'8bit', 17} = gmt_charset:classify2(<<16#52,16#45,16#3a,16#20,16#81,16#79,16#89,16#a9,16#8b,16#e0,16#82,16#cc,16#97,16#a2,16#81,16#7a,16#82,16#a8,16#93,16#cd,16#82,16#af,16#93,16#fa,16#82,16#c9,16#82,16#c2,16#82,16#a2,16#82,16#c4,16#81,16#42>>),
-    
+
     %% hiragana only in shift_jis; 10 bytes; 3xutf8; 1x7bit; 3x8bit
     {'8bit', 3} = gmt_charset:classify2(<<16#82,16#c9,16#82,16#c2,16#82,16#a2,16#82,16#c4,16#81,16#42>>),
 
@@ -146,7 +135,7 @@ start_7_000_test() ->
     %% 1/2 width katakana in shift_jis
     {'8bit',4} = gmt_charset:classify2(<<16#b6,16#c0,16#b6,16#c5>>),
 
-    %% 1/2 width katakana in euc-jp; 8 bytes; 8x8bit; 
+    %% 1/2 width katakana in euc-jp; 8 bytes; 8x8bit;
     {'8bit',8} = gmt_charset:classify2(<<16#8e,16#b6,16#8e,16#c0,16#8e,16#b6,16#8e,16#c5>>),
 
     %% 1/2 width katakana in utf8; 8 bytes; 4xutf8

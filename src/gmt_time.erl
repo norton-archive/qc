@@ -18,8 +18,6 @@
 %%%----------------------------------------------------------------------
 
 -module(gmt_time).
-%% -define(gmt_debug, 1).
--include("gmt_debug.hrl").
 
 -export([time_t/0,
          time_t/1,

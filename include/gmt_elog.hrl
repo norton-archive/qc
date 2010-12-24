@@ -17,67 +17,46 @@
 %%% Purpose : GMT event log
 %%%----------------------------------------------------------------------
 
-%%% These macros are merely examples.  It's likely that apps may want
-%%% to use their own macros rather than these ... that's OK.
-
 -ifndef(gmt_elog_hrl).
 -define(gmt_elog_hrl, true).
 
--include("gmt_applog.hrl").
-
 %%
-%% Events without a category
+%% Events with a message
 %%
 
--define(ELOG_EMERG(Fmt, Args),
-        gmt_elog_policy:enabled(?LOG_EMERG_PRI, none, ?MODULE, ?LINE, Fmt, Args)).
--define(ELOG_ALERT(Fmt, Args),
-        gmt_elog_policy:enabled(?LOG_ALERT_PRI, none, ?MODULE, ?LINE, Fmt, Args)).
--define(ELOG_CRIT(Fmt, Args),
-        gmt_elog_policy:enabled(?LOG_CRIT_PRI, none, ?MODULE, ?LINE, Fmt, Args)).
--define(ELOG_ERR(Fmt, Args),
-        gmt_elog_policy:enabled(?LOG_ERR_PRI, none, ?MODULE, ?LINE, Fmt, Args)).
+-define(ELOG_ERROR(Msg),
+        gmt_elog_policy:enabled(error, undefined, ?MODULE, ?LINE, Msg, [])).
+-define(ELOG_WARNING(Msg),
+        gmt_elog_policy:enabled(warning, undefined, ?MODULE, ?LINE, Msg, [])).
+-define(ELOG_INFO(Msg),
+        gmt_elog_policy:enabled(info, undefined, ?MODULE, ?LINE, Msg, [])).
+-define(ELOG_DEBUG(Msg),
+        gmt_elog_policy:enabled(debug, undefined, ?MODULE, ?LINE, Msg, [])).
+
+%%
+%% Events with a format and args
+%%
+
+-define(ELOG_ERROR(Fmt, Args),
+        gmt_elog_policy:enabled(error, undefined, ?MODULE, ?LINE, Fmt, Args)).
 -define(ELOG_WARNING(Fmt, Args),
-        gmt_elog_policy:enabled(?LOG_WARNING_PRI, none, ?MODULE, ?LINE, Fmt, Args)).
--define(ELOG_NOTICE(Fmt, Args),
-        gmt_elog_policy:enabled(?LOG_NOTICE_PRI, none, ?MODULE, ?LINE, Fmt, Args)).
+        gmt_elog_policy:enabled(warning, undefined, ?MODULE, ?LINE, Fmt, Args)).
 -define(ELOG_INFO(Fmt, Args),
-        gmt_elog_policy:enabled(?LOG_INFO_PRI, none, ?MODULE, ?LINE, Fmt, Args)).
+        gmt_elog_policy:enabled(info, undefined, ?MODULE, ?LINE, Fmt, Args)).
 -define(ELOG_DEBUG(Fmt, Args),
-        gmt_elog_policy:enabled(?LOG_DEBUG_PRI, none, ?MODULE, ?LINE, Fmt, Args)).
+        gmt_elog_policy:enabled(debug, undefined, ?MODULE, ?LINE, Fmt, Args)).
 
 %%
-%% Events with a category
+%% Events with a category, a format, and args
 %%
 
--define(ELOG_EMERG_C(Cat, Fmt, Args),
-        gmt_elog_policy:enabled(?LOG_EMERG_PRI, Cat, ?MODULE, ?LINE, Fmt, Args)).
--define(ELOG_ALERT_C(Cat, Fmt, Args),
-        gmt_elog_policy:enabled(?LOG_ALERT_PRI, Cat, ?MODULE, ?LINE, Fmt, Args)).
--define(ELOG_CRIT_C(Cat, Fmt, Args),
-        gmt_elog_policy:enabled(?LOG_CRIT_PRI, Cat, ?MODULE, ?LINE, Fmt, Args)).
--define(ELOG_ERR_C(Cat, Fmt, Args),
-        gmt_elog_policy:enabled(?LOG_ERR_PRI, Cat, ?MODULE, ?LINE, Fmt, Args)).
--define(ELOG_WARNING_C(Cat, Fmt, Args),
-        gmt_elog_policy:enabled(?LOG_WARNING_PRI, Cat, ?MODULE, ?LINE, Fmt, Args)).
--define(ELOG_NOTICE_C(Cat, Fmt, Args),
-        gmt_elog_policy:enabled(?LOG_NOTICE_PRI, Cat, ?MODULE, ?LINE, Fmt, Args)).
--define(ELOG_INFO_C(Cat, Fmt, Args),
-        gmt_elog_policy:enabled(?LOG_INFO_PRI, Cat, ?MODULE, ?LINE, Fmt, Args)).
--define(ELOG_DEBUG_C(Cat, Fmt, Args),
-        gmt_elog_policy:enabled(?LOG_DEBUG_PRI, Cat, ?MODULE, ?LINE, Fmt, Args)).
-
-%%
-%% Here's an example of using the method where gmt_elog_policy:enabled/6
-%% function is redefined.
-%%
-
-%% NOTE: This is a macro, beware of stray variable bindings inside "Code"!!
-
--define(ELOG_CODE(Pri, Cat, Code),
-        case gmt_elog_policy:enabled(Pri, Cat, ?MODULE, ?LINE, x, x) of
-            true  -> Code;
-            false -> ok
-        end).
+-define(ELOG_ERROR(Cat, Fmt, Args),
+        gmt_elog_policy:enabled(error, Cat, ?MODULE, ?LINE, Fmt, Args)).
+-define(ELOG_WARNING(Cat, Fmt, Args),
+        gmt_elog_policy:enabled(warning, Cat, ?MODULE, ?LINE, Fmt, Args)).
+-define(ELOG_INFO(Cat, Fmt, Args),
+        gmt_elog_policy:enabled(info, Cat, ?MODULE, ?LINE, Fmt, Args)).
+-define(ELOG_DEBUG(Cat, Fmt, Args),
+        gmt_elog_policy:enabled(debug, Cat, ?MODULE, ?LINE, Fmt, Args)).
 
 -endif. % -ifndef(gmt_elog_hrl).

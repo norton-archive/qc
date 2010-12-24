@@ -21,8 +21,6 @@
 
 -behaviour(supervisor).
 
--include("applog.hrl").
-
 %% API
 -export([start_link/1]).
 
@@ -58,33 +56,16 @@ init([]) ->
     %% Child_spec = [Name, {M, F, A},
     %%               Restart, Shutdown_time, Type, Modules_used]
 
-    CentralConfig = gmt_config:get_config_file_path(),
-    ConfigSrv =
-        {gmt_config_svr, {gmt_config_svr, start_link, [CentralConfig]},
-         permanent, 2000, worker, [gmt_config_svr]},
-
     SysMonSrv =
         {gmt_sysmon_server, {gmt_sysmon_server, start_link, []},
          permanent, 2000, worker, [gmt_sysmon_server]},
 
-    %% GMT diff: delete
     TLogSrv =
         {gmt_tlog_svr, {gmt_tlog_svr, start_link, []},
          permanent, 2000, worker, [gmt_tlog_svr]},
 
-    CLIPort = gmt_config:get_config_value_i(cli_port, 0),
-    CLIModule = gmt_config:get_config_value(cli_module, undefined),
-    CLIPrompt = gmt_config:get_config_value(cli_prompt, "CLI> "),
-    CLIHello = gmt_config:get_config_value(cli_hello, "GMT CLI Server"),
-    CLISrv = {gmt_cli, {gmt_cli, start_link,
-                        [CLIPort,CLIModule,CLIPrompt,CLIHello]},
-              permanent, 2000, worker, [gmt_cli]},
+    Servers = [TLogSrv, SysMonSrv],
 
-    Servers = if CLIPort > 0 ->
-                      [ConfigSrv, TLogSrv, SysMonSrv, CLISrv];
-                 true ->
-                      [ConfigSrv, TLogSrv, SysMonSrv]
-              end,
     {ok, {{one_for_one, 15, 60}, Servers}}.
 
 %%====================================================================

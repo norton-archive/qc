@@ -21,6 +21,8 @@
 
 -behaviour(gen_server).
 
+-include("gmt_elog.hrl").
+
 %% API
 -export([start_link/0]).
 
@@ -58,9 +60,9 @@ start_link() ->
 %% Description: Initiates the server
 %%--------------------------------------------------------------------
 init([]) ->
-    {ok, BigGC} = gmt_config_svr:get_config_value_i(sysmon_long_gc, 50),
-    {ok, BigHeap} = gmt_config_svr:get_config_value_i(sysmon_large_heap, 10*1024*1024),
-    {ok, MaxPS} = gmt_config_svr:get_config_value_i(sysmon_max_per_second, 20),
+    {ok, BigGC} = application:get_env(gmt, sysmon_long_gc),
+    {ok, BigHeap} = application:get_env(gmt, sysmon_large_heap),
+    {ok, MaxPS} = application:get_env(gmt, sysmon_max_per_second),
     erlang:system_monitor(self(), [{long_gc, BigGC}, {large_heap, BigHeap},
                                    busy_port, busy_dist_port]),
     {ok, TRef} = timer:send_interval(1000, reset_dict),
@@ -108,16 +110,16 @@ handle_info({monitor, Pid, Type, _Info} = Msg, #state{dict = Dict, count = Count
     catch _X:_Y ->
         NewDict2 = orddict:store(FiltMsg, 1, Dict),
         PInfo = get_pretty_info(Pid),
-        error_logger:info_msg("gmt_sysmon_server: ~P pinfo: ~p\n", [Msg, 30, PInfo]),
+        ?ELOG_INFO("~P pinfo: ~p\n", [Msg, 30, PInfo]),
         {noreply, State#state{dict = NewDict2, count = Count + 1}}
     end;
 handle_info(reset_dict, #state{dict = Dict, count = Count} = State) ->
     if Count > State#state.max_per_sec ->
-        error_logger:info_msg("gmt_sysmon_server: ~p messages suppressed\n", [Count - State#state.max_per_sec]);
+        ?ELOG_INFO("~p messages suppressed\n", [Count - State#state.max_per_sec]);
     true ->
         ok
     end,
-    [error_logger:info_msg("gmt_sysmon_server: ~p extra: ~p\n", [N-1, Msg]) || {Msg, N} <- orddict:to_list(Dict), N > 1],
+    [?ELOG_INFO("~p extra: ~p\n", [N-1, Msg]) || {Msg, N} <- orddict:to_list(Dict), N > 1],
     {noreply, State#state{dict = orddict:new(), count = 0}};
 handle_info(_Info, State) ->
     {noreply, State}.

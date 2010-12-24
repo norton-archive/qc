@@ -21,6 +21,8 @@
 
 -behaviour(gen_server).
 
+-include("gmt_elog.hrl").
+
 %% API
 -export([start_link/1, start_link/2, enqueue/2, get_limit/1, change_limit/2]).
 
@@ -137,7 +139,7 @@ handle_info({'DOWN', _, _, _, _},
             {noreply, State#state{current = Current - 1}}
     end;
 handle_info(_Info, State) ->
-    error_logger:error_msg("~s: handle_info: ~p\n", [?MODULE, _Info]),
+    ?ELOG_INFO("handle_info: ~p\n", [_Info]),
     {noreply, State}.
 
 %%--------------------------------------------------------------------
