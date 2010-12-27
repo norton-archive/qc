@@ -30,6 +30,7 @@
              , gmt_charset
              , gmt_cinfo_basic
              , gmt_elog_policy
+             , gmt_genutil
              , gmt_loop
              , gmt_otp
              , gmt_parallel_limit

@@ -94,7 +94,7 @@
 -spec set_alarm(any(), any()) -> 'ok'.
 -spec set_alarm(any(), any(), any()) -> 'ok'.
 -spec set_alarm(any(), any(), any(),list()) -> 'ok'.
--spec split_bin_on_char(binary(), integer()) -> [binary()].
+-spec split_bin_on_char(binary(), integer()) -> [binary(),...].
 -spec timeout_ify(binary() | string() | timeout()) -> timeout().
 -spec timeoutsec_ify(binary() | string() | timeout()) -> timeout().
 
