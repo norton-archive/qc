@@ -42,14 +42,15 @@
           , acclen=0
          }).
 
+-define(TLOG_CONFIG_FORMATTER, application_tx_log_formatter).
 -define(TLOG_CONFIG_PATH, application_tx_log_path).
 -define(TLOG_CONFIG_FLUSH, application_tx_log_flush).
 
 -define(TLOG_KEY_EVENT, {?MODULE,event}).
--define(TLOG_KEY_PRINT, {?MODULE,print}).
+-define(TLOG_KEY_FORMATTER, {?MODULE,formatter}).
 
 
-%% external functions -----------------------------------------------------------
+%% external functions ----------------------------------------------------------
 
 start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
@@ -69,19 +70,27 @@ tlog(Event) ->
     tlog(Event, now()).
 
 tlog(#tlog_core{}=Event, Now) ->
-    case get(?TLOG_KEY_PRINT) of
-        true ->
+    case get(?TLOG_KEY_FORMATTER) of
+        false ->
             ok;
-        _ ->
+        Value ->
+            if Value == undefined ->
+                    {ok, Formatter} = application:get_env(gmt, ?TLOG_CONFIG_FORMATTER),
+                    Formatter;
+               true ->
+                    Formatter = Value
+            end,
             try
-                ?MODULE ! {fevent, gmt_tlog_printer:tlog_format(Event, Now)}
+                ?MODULE ! {fevent, Formatter:tlog_format(Event, Now)}
             catch
                 error:badarg ->
+                    %% skip *this* attempt if logger process is
+                    %% unreachable
                     ok;
                 error:undef ->
-                    put(?TLOG_KEY_PRINT, true);
-                _:_ ->
-                    noop %% not really ok, but nothing else to do here
+                    %% disable *further* attempts if no formatter is
+                    %% defined
+                    put(?TLOG_KEY_FORMATTER, false)
             end,
             ok
     end.
@@ -158,7 +167,7 @@ terminate(_Reason, State) ->
     catch do_close(State).
 
 
-%% internal functions -----------------------------------------------------------
+%% internal functions ----------------------------------------------------------
 
 do_reopen(#state{acclen=0}=State) ->
     do_open(do_close(State));

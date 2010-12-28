@@ -42,6 +42,8 @@
              , gmt_util
             ]},
   {env, [{application_evt_log_level, warning}
+         , {application_evt_log_type, undefined}
+         , {application_tx_log_formatter, undefined}
          , {application_tx_log_flush, 0}
          , {application_tx_log_path, "/dev/null"}
          , {sysmon_large_heap, 10485760}
