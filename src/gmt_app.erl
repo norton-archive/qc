@@ -40,11 +40,9 @@ start() ->
 start(_Type, StartArgs) ->
     catch gmt_cinfo_basic:register(),
     case gmt_sup:start_link(StartArgs) of
-        {ok, Pid} = Ok ->
-            io:format("QQQ: ~s:start ok Pid = ~p\n", [?MODULE, Pid]),
+        {ok, _Pid} = Ok ->
             Ok;
         Error ->
-            io:format("QQQ: ~s:start bummer: ~p\n", [?MODULE, Error]),
             Error
     end.
 
