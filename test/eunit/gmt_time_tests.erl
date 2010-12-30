@@ -13,11 +13,11 @@
 %%% See the License for the specific language governing permissions and
 %%% limitations under the License.
 %%%
-%%% File    : gmt_time_SUITE.erl
+%%% File    : gmt_time_tests.erl
 %%% Purpose : GMT time test suite
 %%%----------------------------------------------------------------------
 
--module(gmt_time_SUITE).
+-module(gmt_time_tests).
 
 -include_lib("eunit/include/eunit.hrl").
 
