@@ -1321,7 +1321,7 @@ dbgon(Module) ->
     case dbg:tracer() of
         {ok,_} ->
             dbg:p(all,call),
-            dbg:tpl(Module, [{'_',[],[{return_trace}, {exception_trace}]}]),
+            {ok, _} = dbg:tpl(Module, [{'_',[],[{return_trace}, {exception_trace}]}]),
             ok;
         Else ->
             Else
@@ -1330,35 +1330,35 @@ dbgon(Module) ->
 dbgon(Module, Fun) when is_atom(Fun) ->
     {ok,_} = dbg:tracer(),
     dbg:p(all,call),
-    dbg:tpl(Module, Fun, [{'_',[],[{return_trace}, {exception_trace}]}]),
+    {ok, _} = dbg:tpl(Module, Fun, [{'_',[],[{return_trace}, {exception_trace}]}]),
     ok;
 
 dbgon(Module, File) when is_list(File) ->
     {ok,_} = dbg:tracer(port, dbg:trace_port(file, File)),
     dbg:p(all,call),
-    dbg:tpl(Module, [{'_',[],[{return_trace}, {exception_trace}]}]),
+    {ok, _} = dbg:tpl(Module, [{'_',[],[{return_trace}, {exception_trace}]}]),
     ok;
 
 dbgon(Module, Port) when is_integer(Port) ->
     {ok,_} = dbg:tracer(port, dbg:trace_port(ip, Port)),
     dbg:p(all,call),
-    dbg:tpl(Module, [{'_',[],[{return_trace}, {exception_trace}]}]),
+    {ok, _} = dbg:tpl(Module, [{'_',[],[{return_trace}, {exception_trace}]}]),
     ok.
 
 dbgadd(Module) ->
-    dbg:tpl(Module, [{'_',[],[{return_trace}, {exception_trace}]}]),
+    {ok, _} = dbg:tpl(Module, [{'_',[],[{return_trace}, {exception_trace}]}]),
     ok.
 
 dbgadd(Module, Fun) ->
-    dbg:tpl(Module, Fun, [{'_',[],[{return_trace}, {exception_trace}]}]),
+    {ok, _} = dbg:tpl(Module, Fun, [{'_',[],[{return_trace}, {exception_trace}]}]),
     ok.
 
 dbgdel(Module) ->
-    dbg:ctpl(Module),
+    {ok, _} = dbg:ctpl(Module),
     ok.
 
 dbgdel(Module, Fun) ->
-    dbg:ctpl(Module, Fun),
+    {ok, _} = dbg:ctpl(Module, Fun),
     ok.
 
 dbgoff() ->

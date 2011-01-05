@@ -63,8 +63,8 @@ init([]) ->
     {ok, BigGC} = application:get_env(gmt, sysmon_long_gc),
     {ok, BigHeap} = application:get_env(gmt, sysmon_large_heap),
     {ok, MaxPS} = application:get_env(gmt, sysmon_max_per_second),
-    erlang:system_monitor(self(), [{long_gc, BigGC}, {large_heap, BigHeap},
-                                   busy_port, busy_dist_port]),
+    _ = erlang:system_monitor(self(), [{long_gc, BigGC}, {large_heap, BigHeap},
+                                       busy_port, busy_dist_port]),
     {ok, TRef} = timer:send_interval(1000, reset_dict),
     {ok, #state{tref = TRef, dict = orddict:new(), max_per_sec = MaxPS}}.
 
@@ -119,7 +119,7 @@ handle_info(reset_dict, #state{dict = Dict, count = Count} = State) ->
     true ->
         ok
     end,
-    [?ELOG_INFO("~p extra: ~p\n", [N-1, Msg]) || {Msg, N} <- orddict:to_list(Dict), N > 1],
+    _ = [?ELOG_INFO("~p extra: ~p\n", [N-1, Msg]) || {Msg, N} <- orddict:to_list(Dict), N > 1],
     {noreply, State#state{dict = orddict:new(), count = 0}};
 handle_info(_Info, State) ->
     {noreply, State}.
