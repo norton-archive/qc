@@ -57,10 +57,10 @@
              -> 'true' | 'false'.
 
 enabled(error, _Category, Module, Line, Fmt, Args) ->
-    case application:get_env(gmt, application_evt_log_level) of
+    case application:get_env(gmt_util, application_evt_log_level) of
         {ok, Level} when Level == info; Level == warning; Level == error ->
             Report = report(Module, Line, Fmt, Args),
-            case application:get_env(gmt, application_evt_log_type) of
+            case application:get_env(gmt_util, application_evt_log_type) of
                 {ok, undefined} ->
                     ok = error_logger:error_report(Report);
                 {ok, Type} ->
@@ -71,10 +71,10 @@ enabled(error, _Category, Module, Line, Fmt, Args) ->
             false
     end;
 enabled(warning, _Category, Module, Line, Fmt, Args) ->
-    case application:get_env(gmt, application_evt_log_level) of
+    case application:get_env(gmt_util, application_evt_log_level) of
         {ok, Level} when Level == info; Level == warning ->
             Report = report(Module, Line, Fmt, Args),
-            case application:get_env(gmt, application_evt_log_type) of
+            case application:get_env(gmt_util, application_evt_log_type) of
                 {ok, undefined} ->
                     ok = error_logger:warning_report(Report);
                 {ok, Type} ->
@@ -85,10 +85,10 @@ enabled(warning, _Category, Module, Line, Fmt, Args) ->
             false
     end;
 enabled(info, _Category, Module, Line, Fmt, Args) ->
-    case application:get_env(gmt, application_evt_log_level) of
+    case application:get_env(gmt_util, application_evt_log_level) of
         {ok, Level} when Level == info ->
             Report = report(Module, Line, Fmt, Args),
-            case application:get_env(gmt, application_evt_log_type) of
+            case application:get_env(gmt_util, application_evt_log_type) of
                 {ok, undefined} ->
                     ok = error_logger:info_report(Report);
                 {ok, Type} ->

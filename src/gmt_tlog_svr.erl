@@ -75,7 +75,7 @@ tlog(#tlog_core{}=Event, Now) ->
             ok;
         Value ->
             if Value == undefined ->
-                    {ok, Formatter} = application:get_env(gmt, ?TLOG_CONFIG_FORMATTER),
+                    {ok, Formatter} = application:get_env(gmt_util, ?TLOG_CONFIG_FORMATTER),
                     Formatter;
                true ->
                     Formatter = Value
@@ -134,7 +134,7 @@ tlog_duration(StartTime, Now) ->
 %% gen_server callbacks --------------------------------------------------
 
 init(_) ->
-    {ok, Filename} = application:get_env(gmt, ?TLOG_CONFIG_PATH),
+    {ok, Filename} = application:get_env(gmt_util, ?TLOG_CONFIG_PATH),
     {ok, do_open(#state{filename=Filename})}.
 
 handle_call(reopen, _From, State) ->
@@ -176,7 +176,7 @@ do_reopen(#state{fd=Fd,acc=Acc}=State) ->
     do_open(do_close(State#state{acc=[],acclen=0})).
 
 do_open(#state{filename=Filename}=State) ->
-    {ok, Flush} = application:get_env(gmt, ?TLOG_CONFIG_FLUSH),
+    {ok, Flush} = application:get_env(gmt_util, ?TLOG_CONFIG_FLUSH),
     case file:open(Filename, [append,raw,binary,delayed_write]) of
         {ok, Fd} ->
             State#state{fd=Fd,flush=Flush};

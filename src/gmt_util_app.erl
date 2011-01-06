@@ -13,11 +13,11 @@
 %%% See the License for the specific language governing permissions and
 %%% limitations under the License.
 %%%
-%%% File     : gmt_app.erl
-%%% Purpose  : GMT dummy application callback module
+%%% File     : gmt_util_app.erl
+%%% Purpose  : GMT util application callback module
 %%%----------------------------------------------------------------------
 
--module(gmt_app).
+-module(gmt_util_app).
 
 -behaviour(application).
 
@@ -39,7 +39,7 @@ start() ->
 
 start(_Type, StartArgs) ->
     catch gmt_cinfo_basic:register(),
-    case gmt_sup:start_link(StartArgs) of
+    case gmt_util_sup:start_link(StartArgs) of
         {ok, _Pid} = Ok ->
             Ok;
         Error ->

@@ -60,9 +60,9 @@ start_link() ->
 %% Description: Initiates the server
 %%--------------------------------------------------------------------
 init([]) ->
-    {ok, BigGC} = application:get_env(gmt, sysmon_long_gc),
-    {ok, BigHeap} = application:get_env(gmt, sysmon_large_heap),
-    {ok, MaxPS} = application:get_env(gmt, sysmon_max_per_second),
+    {ok, BigGC} = application:get_env(gmt_util, sysmon_long_gc),
+    {ok, BigHeap} = application:get_env(gmt_util, sysmon_large_heap),
+    {ok, MaxPS} = application:get_env(gmt_util, sysmon_max_per_second),
     _ = erlang:system_monitor(self(), [{long_gc, BigGC}, {large_heap, BigHeap},
                                        busy_port, busy_dist_port]),
     {ok, TRef} = timer:send_interval(1000, reset_dict),

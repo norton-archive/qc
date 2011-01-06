@@ -15,19 +15,18 @@
 %%% See the License for the specific language governing permissions and
 %%% limitations under the License.
 %%%
-%%% File    : gmt.app
-%%% Purpose : GMT application
+%%% File    : gmt_util.app
+%%% Purpose : GMT util application
 %%%----------------------------------------------------------------------
 
-{application, gmt,
+{application, gmt_util,
  [
-  {description, "GMT application"},
+  {description, "GMT util application"},
   {vsn, "0.1.0"},
   {registered, []},
   {applications, [kernel, stdlib, sasl]},
-  {mod, {gmt_app, []}},
-  {modules, [gmt_app
-             , gmt_charset
+  {mod, {gmt_util_app, []}},
+  {modules, [gmt_charset
              , gmt_cinfo_basic
              , gmt_elog_policy
              , gmt_genutil
@@ -35,11 +34,12 @@
              , gmt_otp
              , gmt_parallel_limit
              , gmt_pmap
-             , gmt_sup
              , gmt_sysmon_server
              , gmt_time
              , gmt_tlog_svr
              , gmt_util
+             , gmt_util_app
+             , gmt_util_sup
             ]},
   {env, [{application_evt_log_level, warning}
          , {application_evt_log_type, undefined}

@@ -13,11 +13,11 @@
 %%% See the License for the specific language governing permissions and
 %%% limitations under the License.
 %%%
-%%% File    : gmt_sup.erl
-%%% Purpose : Top-level gmt supervisor
+%%% File    : gmt_util_sup.erl
+%%% Purpose : Top-level gmt util supervisor
 %%%-------------------------------------------------------------------
 
--module(gmt_sup).
+-module(gmt_util_sup).
 
 -behaviour(supervisor).
 
