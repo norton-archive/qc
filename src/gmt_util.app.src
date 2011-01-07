@@ -28,7 +28,9 @@
   {mod, {gmt_util_app, []}},
   {modules, [gmt_charset
              , gmt_cinfo_basic
+             , gmt_edoc
              , gmt_elog_policy
+             , gmt_erlang
              , gmt_genutil
              , gmt_loop
              , gmt_otp
