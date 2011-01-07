@@ -1,7 +1,7 @@
 %%%-------------------------------------------------------------------
 %%% $Id$
 %%% Description: GMT charset test suite
-%%% Copyright: (c) 2010 Gemini Mobile Technologies, Inc.  All rights reserved.
+%%% Copyright (c) 2011 Gemini Mobile Technologies, Inc.  All rights reserved.
 %%%-------------------------------------------------------------------
 
 -module(gmt_charset_tests).
