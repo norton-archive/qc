@@ -532,6 +532,8 @@ node_localid() ->
 
 node_localid(SName) ->
     case re:run(SName, "_[0-9]+$") of
+        nomatch ->
+            0;
         {match,[]} ->
             0;
         {match,[{Start,Length}]} ->
