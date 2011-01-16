@@ -52,4 +52,30 @@
          , {sysmon_long_gc, 50}
          , {sysmon_max_per_second, 20}
         ]}
+  %%
+  %% application_evt_log_level
+  %%   TODO
+  %%
+  %% application_evt_log_type
+  %%   TODO
+  %%
+  %% application_tx_log_formatter
+  %%   TODO
+  %%
+  %% application_tx_log_flush
+  %%   Limit for the transaction log file number of log entries to
+  %%   buffer before storing to disk.
+  %%
+  %% application_tx_log_path
+  %%   Path to the transaction log file, including file name.
+  %%
+  %% sysmon_large_heap
+  %%   TODO
+  %%
+  %% sysmon_long_gc
+  %%   TODO
+  %%
+  %% sysmon_max_per_second
+  %%   TODO
+  %%
  ]}.
