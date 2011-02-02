@@ -928,7 +928,7 @@ total_megs() ->
 %%
 %% Below is an implementation of `gmt_util:list_chop/2' using this function.
 %% It is approximately 30-50% slower than `list_chop/2'.
-%% `eqc:quickcheck(eqc:numtests(5000, gmt_util_eqc:prop_list_chop()))' says
+%% `eqc:quickcheck(eqc:numtests(5000, gmt_util_eqc_tests:prop_list_chop()))' says
 %% that these two functions are equivalent.
 %%
 %% ```
