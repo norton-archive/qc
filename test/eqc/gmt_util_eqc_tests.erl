@@ -23,16 +23,19 @@
 
 -include_lib("eqc/include/eqc.hrl").
 
+-export([run/0]).
 -compile(export_all).
 
-run_tests_() ->
-    {timeout, 60, [fun() -> run_tests() end]}.
+%% run from eunit
+eunit_test_() ->
+    erlang:group_leader(whereis(user), self()),
+    {timeout, 60, [fun() -> [] = run() end]}.
 
-run_tests() ->
-    eqc:module({numtests, 500}, ?MODULE).
+run() ->
+    run(3000).
 
-run_tests(Tests) ->
-    eqc:module({numtests, Tests}, ?MODULE).
+run(Num) ->
+    eqc:module({numtests,Num}, ?MODULE).
 
 string() ->
     list(char()).
