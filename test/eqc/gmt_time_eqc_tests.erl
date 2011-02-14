@@ -28,8 +28,7 @@
 
 %% run from eunit
 eunit_test_() ->
-    erlang:group_leader(whereis(user), self()),
-    {timeout, 60, [fun() -> [] = run() end]}.
+    gmt_eqc:eunit_module(?MODULE, 3000).
 
 run() ->
     run(3000).
