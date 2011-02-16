@@ -87,7 +87,7 @@ eunit_setup(Module) ->
     Module.
 
 eunit_teardown(Module) ->
-    ?assertEqual(write_counterexamples(Module), []).
+    ?assertEqual([], write_counterexamples(Module)).
 
 eunit_run(Module, NumTests) ->
     erlang:group_leader(whereis(user), self()),
