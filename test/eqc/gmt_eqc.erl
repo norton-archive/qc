@@ -28,7 +28,7 @@
 -export([silent/1]).
 -export([write_counterexamples/1, write_counterexamples/2, write_counterexamples/3]).
 -export([write_counterexample/3, write_counterexample/4]).
--export([eunit_module/1, eunit_module/2, eunit_module/3]).
+-export([eunit_module/1, eunit_module/2, eunit_module/3, eunit_module/4]).
 
 %% @doc Starts (and possibly restarts) the QuickCheck server. If
 %% another instance is not running, start the server and return the
@@ -77,8 +77,11 @@ eunit_module(Module, NumTests) ->
     eunit_module(Module, NumTests, 60).
 
 eunit_module(Module, NumTests, Timeout) ->
+    eunit_module(Module, NumTests, Timeout, fun() -> noop end).
+
+eunit_module(Module, NumTests, Timeout, Teardown) ->
     {setup, fun() -> eunit_setup(Module) end
-     , fun eunit_teardown/1
+     , fun(Mod) -> Teardown(), eunit_teardown(Mod) end
      , {timeout, Timeout, [fun() -> eunit_run(Module, NumTests) end]}
     }.
 
