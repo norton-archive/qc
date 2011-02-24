@@ -84,7 +84,7 @@ gmt_list(G, Attrs) when is_list(Attrs) ->
         [] ->
             eqc_gen:list(G);
         [nonempty] ->
-            ?LET(L,eqc_gen:list(G), if L =/= [] -> L; true -> [G] end)
+            eqc_gen:non_empty(eqc_gen:list(G))
     end.
 
 %%%%%%
