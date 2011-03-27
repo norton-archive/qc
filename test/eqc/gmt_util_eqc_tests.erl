@@ -19,9 +19,19 @@
 
 -module(gmt_util_eqc_tests).
 
--ifdef(EQC).
+-ifdef(PROPER).
+-include_lib("proper/include/proper.hrl").
+-define(GMTQC, proper).
+-undef(EQC).
+-endif. %% -ifdef(PROPER).
 
+-ifdef(EQC).
 -include_lib("eqc/include/eqc.hrl").
+-define(GMTQC, eqc).
+-undef(PROPER).
+-endif. %% -ifdef(EQC).
+
+-ifdef(GMTQC).
 
 -export([run/0]).
 -compile(export_all).
@@ -34,15 +44,15 @@ run() ->
     run(3000).
 
 run(Num) ->
-    eqc:module({numtests,Num}, ?MODULE).
+    ?GMTQC:module({numtests,Num}, ?MODULE).
 
-string() ->
+my_string() ->
     list(char()).
 
 %% property to check gmt_util:left_pad() function
 %% Checks length and correct padding/strings
 prop_left_pad() ->
-    ?FORALL({Str, Len, Char}, {string(), int(), char()},
+    ?FORALL({Str, Len, Char}, {my_string(), int(), char()},
             begin
                 S = gmt_util:left_pad(Str, Len, Char),
                 StrLen = length(Str),
@@ -60,7 +70,7 @@ prop_left_pad() ->
 %% property to check gmt_util:right_pad() function
 %% Checks length and correct padding/strings
 prop_right_pad() ->
-    ?FORALL({Str, Len, Char}, {string(), int(), char()},
+    ?FORALL({Str, Len, Char}, {my_string(), int(), char()},
             begin
                 S = gmt_util:right_pad(Str, Len, Char),
                 StrLen = length(Str),
@@ -79,4 +89,4 @@ prop_list_unique_u() ->
     ?FORALL(L, list(int()),
             lists:sort(gmt_util:list_unique_u(L)) == lists:usort(L)).
 
--endif. %% -ifdef(EQC).
+-endif. %% -ifdef(GMTQC).

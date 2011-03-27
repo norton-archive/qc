@@ -19,9 +19,19 @@
 
 -module(gmt_time_eqc_tests).
 
--ifdef(EQC).
+-ifdef(PROPER).
+-include_lib("proper/include/proper.hrl").
+-define(GMTQC, proper).
+-undef(EQC).
+-endif. %% -ifdef(PROPER).
 
+-ifdef(EQC).
 -include_lib("eqc/include/eqc.hrl").
+-define(GMTQC, eqc).
+-undef(PROPER).
+-endif. %% -ifdef(EQC).
+
+-ifdef(GMTQC).
 
 -export([run/0]).
 -compile(export_all).
@@ -34,14 +44,11 @@ run() ->
     run(3000).
 
 run(Num) ->
-    eqc:module({numtests,Num}, ?MODULE).
+    ?GMTQC:module({numtests,Num}, ?MODULE).
 
 dayinmonth(Y,M) ->
-    oneof(
-      [choose(1,28)] ++
-          [choose(1,31) || lists:member(M,[1,3,5,7,8,10,12])] ++
-          [choose(1,30) || lists:member(M,[4,6,9,11])] ++
-          [choose(1,29) || (M==2) and calendar:is_leap_year(Y)]).
+    NumDays = calendar:last_day_of_the_month(Y, M),
+    choose(1, NumDays).
 
 divisible(N,M) ->
     N rem M == 0.
@@ -78,4 +85,4 @@ prop_time_t() ->
             end
            ).
 
--endif. %% -ifdef(EQC).
+-endif. %% -ifdef(GMTQC).

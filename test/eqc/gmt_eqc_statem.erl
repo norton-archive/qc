@@ -19,10 +19,23 @@
 
 -module(gmt_eqc_statem).
 
--ifdef(EQC).
+-ifdef(PROPER).
+-include_lib("proper/include/proper.hrl").
+-define(GMTQC, proper).
+-define(GMTQC_GEN, proper_gen).
+-undef(EQC).
+-define(ALWAYS(_N,PROP), PROP).
+-endif. %% -ifdef(PROPER).
 
+-ifdef(EQC).
 -include_lib("eqc/include/eqc.hrl").
 -include_lib("eqc/include/eqc_statem.hrl").
+-define(GMTQC, eqc).
+-define(GMTQC_GEN, eqc_gen).
+-undef(PROPER).
+-endif. %% -ifdef(EQC).
+
+-ifdef(GMTQC).
 
 %% API
 -export([gmt_sample_commands/1, gmt_sample_commands/2]).
@@ -73,9 +86,9 @@ gmt_sample_commands(Mod, Options)
   when is_atom(Mod), is_list(Options) ->
     %% commands - sample
     Params = [{mod,Mod},{options,Options}],
-    eqc_gen:sample(eqc_gen:with_parameters(Params,
-                                           ?LET(InitialState,initial_state(Mod),
-                                                command(InitialState)))).
+    ?GMTQC_GEN:sample(with_parameters(Params,
+                                      ?LET(InitialState,initial_state(Mod),
+                                           command(InitialState)))).
 
 gmt_run_commands(Mod) ->
     gmt_run_commands(Mod, []).
@@ -91,15 +104,15 @@ gmt_run_commands(Mod, Options)
     Params = [{parallel,Parallel},{mod,Mod},{options,Options}],
     case Parallel of
         false ->
-            ?FORALL(Cmds,eqc_gen:with_parameters(Params,
-                                                 ?LET(InitialState,initial_state(Mod),
-                                                      eqc_statem:commands(?MODULE,InitialState))),
+            ?FORALL(Cmds,with_parameters(Params,
+                                         ?LET(InitialState,initial_state(Mod),
+                                              commands(?MODULE,InitialState))),
                     begin
                         %% commands - setup
                         {ok,TestRef} = Mod:commands_setup(false),
 
                         %% commands - run
-                        {H,S,Res} = eqc_statem:run_commands(?MODULE,Cmds,Params),
+                        {H,S,Res} = run_commands(?MODULE,Cmds,Params),
 
                         %% whenfail
                         ?WHENFAIL(
@@ -113,7 +126,7 @@ gmt_run_commands(Mod, Options)
                                    length(H) < 1 ->
                                        io:format(" none~n");
                                    true ->
-                                       CmdsH = eqc_statem:zip(tl(Cmds),H),
+                                       CmdsH = zip(tl(Cmds),H),
                                        [ begin
                                              {Cmd,{State,Reply}} = lists:nth(N,CmdsH),
                                              io:format("~n #~p:~n\tCmd: ~p~n\tReply: ~p~n\tState: ~p~n",
@@ -134,25 +147,25 @@ gmt_run_commands(Mod, Options)
                             andalso ok =:= Mod:commands_teardown(TestRef,S#state.mod_state)))
                     end);
         true ->
-            ?FORALL(Repetitions,?SHRINK(1,[10]),
-                    ?FORALL(Cmds,eqc_gen:with_parameters(Params,
-                                                         ?LET(InitialState,initial_state(Mod),
-                                                              eqc_statem:parallel_commands(?MODULE,InitialState))),
-                            ?ALWAYS(Repetitions,
+            ?FORALL(_Repetitions,?SHRINK(1,[10]),
+                    ?FORALL(Cmds,with_parameters(Params,
+                                                 ?LET(InitialState,initial_state(Mod),
+                                                      parallel_commands(?MODULE,InitialState))),
+                            ?ALWAYS(_Repetitions,
                                     begin
                                         %% commands - setup
                                         {ok,TestRef} = Mod:commands_setup(false),
 
                                         %% commands - run
-                                        {H,HL,Res} = eqc_statem:run_parallel_commands(?MODULE,Cmds,Params),
+                                        {H,HL,Res} = run_parallel_commands(?MODULE,Cmds,Params),
 
-                                       %% whenfail
+                                        %% whenfail
                                         ?WHENFAIL(
                                            begin
                                                %% commands
                                                FileName = write_commands(Cmds),
                                                io:format("~nCOMMANDS:~n\t~p~n",[FileName]),
-					       %% history
+                                               %% history
                                                io:format("~nHISTORY:~n\t~p~n",[H]),
                                                %% history list
                                                io:format("~nHISTORY LIST:~n\t~p~n",[HL]),
@@ -220,4 +233,4 @@ write_commands(Cmds,FileName) ->
     ok = file:write_file(FileName, io_lib:format("~p.", [Cmds])),
     FileName.
 
--endif. %% -ifdef(EQC).
+-endif. %% -ifdef(GMTQC).

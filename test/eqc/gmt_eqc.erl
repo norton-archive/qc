@@ -19,9 +19,21 @@
 
 -module(gmt_eqc).
 
--ifdef(EQC).
+-ifdef(PROPER).
+-include_lib("proper/include/proper.hrl").
+-define(GMTQC, proper).
+-define(GMTQC_GEN, proper_gen).
+-undef(EQC).
+-endif. %% -ifdef(PROPER).
 
+-ifdef(EQC).
 -include_lib("eqc/include/eqc.hrl").
+-define(GMTQC, eqc).
+-define(GMTQC_GEN, eqc_gen).
+-undef(PROPER).
+-endif. %% -ifdef(EQC).
+
+-ifdef(GMTQC).
 -include_lib("eunit/include/eunit.hrl").
 
 -export([start/0]).
@@ -30,6 +42,13 @@
 -export([write_counterexample/3, write_counterexample/4]).
 -export([eunit_module/1, eunit_module/2, eunit_module/3, eunit_module/4]).
 
+-ifdef(PROPER).
+%% @doc PropER doesn't have a server.  Always return true.
+start() ->
+    true.
+-endif. %% -ifdef(PROPER).
+
+-ifdef(EQC).
 %% @doc Starts (and possibly restarts) the QuickCheck server. If
 %% another instance is not running, start the server and return the
 %% server's process id.  If another instance is already running,
@@ -43,21 +62,32 @@ start() ->
         _X:_Y ->
             eqc:start(true)
     end.
+-endif. %% -ifdef(EQC).
 
 %% @doc Disable QuickCheck's test output (i.e. the "dots")
 silent(Prop) ->
+    on_output(silent_printer(), Prop).
+
+silent_printer() ->
     Filter = fun($.) -> false; (_) -> true end,
-    on_output(fun(Fmt, Args) -> io:format(lists:filter(Filter,Fmt), Args), ok end, Prop).
+    fun(Fmt, Args) -> io:format(lists:filter(Filter,Fmt), Args), ok end.
 
 %% @doc Write failing counterexamples for specified Module
 write_counterexamples(Module) ->
-    write_counterexamples(Module, eqc:counterexamples()).
+    write_counterexamples(Module, ?GMTQC:counterexamples()).
 
 write_counterexamples(Module, CounterExamples) ->
     write_counterexamples(Module, CounterExamples, calendar:local_time()).
 
+-ifdef(PROPER).
+write_counterexamples(Module, CounterExamples, LocalTime) ->
+    [ write_counterexample(Module, Prop, CE, LocalTime) || {{_Mod,Prop,_Arity}, CE} <- CounterExamples ].
+-endif. %% -ifdef(PROPER).
+
+-ifdef(EQC).
 write_counterexamples(Module, CounterExamples, LocalTime) ->
     [ write_counterexample(Module, Prop, CE, LocalTime) || {Prop, CE} <- CounterExamples ].
+-endif. %% -ifdef(EQC).
 
 write_counterexample(Module, Prop, CounterExample) ->
     write_counterexample(Module, Prop, CounterExample, calendar:local_time()).
@@ -69,7 +99,7 @@ write_counterexample(Module, Prop, CounterExample, {{Year,Month,Day},{Hour,Minut
     ok = file:write_file(FileName, io_lib:format("~p.", [CounterExample])),
     FileName.
 
-%% @doc Wrap eqc:module as an EUnit test fixture
+%% @doc Wrap module as an EUnit test fixture
 eunit_module(Module) ->
     eunit_module(Module, 3000).
 
@@ -80,7 +110,7 @@ eunit_module(Module, NumTests, Timeout) ->
     eunit_module(Module, NumTests, Timeout, fun() -> noop end).
 
 eunit_module(Module, NumTests, Timeout, Teardown) ->
-    {setup, fun() -> eunit_setup(Module) end
+    {setup, local, fun() -> eunit_setup(Module) end
      , fun(Mod) -> Teardown(), eunit_teardown(Mod) end
      , {timeout, Timeout, [fun() -> eunit_run(Module, NumTests) end]}
     }.
@@ -92,8 +122,16 @@ eunit_setup(Module) ->
 eunit_teardown(Module) ->
     ?assertEqual([], write_counterexamples(Module)).
 
+-ifdef(PROPER).
 eunit_run(Module, NumTests) ->
     erlang:group_leader(whereis(user), self()),
-    eqc:module([{numtests,NumTests}, fun eqc_gen:noshrink/1, fun silent/1], Module).
+    ?GMTQC:module([{numtests,NumTests}, noshrink, {on_output,silent_printer()}], Module).
+-endif. %% -ifdef(PROPER).
 
+-ifdef(EQC).
+eunit_run(Module, NumTests) ->
+    erlang:group_leader(whereis(user), self()),
+    ?GMTQC:module([{numtests,NumTests}, fun ?GMTQC_GEN:noshrink/1, {on_output,silent_printer()}], Module).
 -endif. %% -ifdef(EQC).
+
+-endif. %% -ifdef(GMTQC).
