@@ -198,17 +198,41 @@ gmt_char(Attrs) when is_list(Attrs) ->
 gmt_timeout() ->
     oneof([infinity,choose(100000,10000000)]).
 
+gmt_timeout(Attrs) when is_list(Attrs) ->
+    case lists:usort(Attrs) of
+        [noninfinite] ->
+            choose(100000,10000000);
+        [] ->
+            gmt_timeout()
+    end.
+
 
 %%%%%%
 %% expires
 gmt_expires() ->
     ?LET(Timeout,gmt_timeout(),gmt_time:make_expires(Timeout)).
 
+gmt_expires(Attrs) when is_list(Attrs) ->
+    case X = lists:usort(Attrs) of
+        [noninfinite] ->
+            ?LET(Timeout,gmt_timeout(X),gmt_time:make_expires(Timeout));
+        [] ->
+            gmt_timeout()
+    end.
+
 
 %%%%%%
 %% timeout_or_expires
 gmt_timeout_or_expires() ->
     ?LET(Timeout,gmt_timeout(),oneof([Timeout,gmt_time:make_expires(Timeout)])).
+
+gmt_timeout_or_expires(Attrs) when is_list(Attrs) ->
+    case X = lists:usort(Attrs) of
+        [noninfinite] ->
+            ?LET(Timeout,gmt_timeout(X),oneof([Timeout,gmt_time:make_expires(Timeout)]));
+        [] ->
+            gmt_timeout_or_expires()
+    end.
 
 
 %%%%%%
