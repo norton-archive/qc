@@ -36,6 +36,7 @@
 -ifdef(GMTQC).
 -include_lib("eunit/include/eunit.hrl").
 
+-export([module/2]).
 -export([start/0]).
 -export([silent/1]).
 -export([write_counterexamples/1, write_counterexamples/2, write_counterexamples/3]).
@@ -43,12 +44,20 @@
 -export([eunit_module/1, eunit_module/2, eunit_module/3, eunit_module/4]).
 
 -ifdef(PROPER).
+%% @doc PropER has a different API than EQC
+module(Options, Module) ->
+    proper:module(Module, Options).
+
 %% @doc PropER doesn't have a server.  Always return true.
 start() ->
     true.
 -endif. %% -ifdef(PROPER).
 
 -ifdef(EQC).
+%% @doc Same API as EQC
+module(Options, Module) ->
+    eqc:module(Options, Module).
+
 %% @doc Starts (and possibly restarts) the QuickCheck server. If
 %% another instance is not running, start the server and return the
 %% server's process id.  If another instance is already running,
@@ -125,13 +134,13 @@ eunit_teardown(Module) ->
 -ifdef(PROPER).
 eunit_run(Module, NumTests) ->
     erlang:group_leader(whereis(user), self()),
-    ?GMTQC:module([{numtests,NumTests}, noshrink, {on_output,silent_printer()}], Module).
+    module([{numtests,NumTests}, noshrink, {on_output,silent_printer()}], Module).
 -endif. %% -ifdef(PROPER).
 
 -ifdef(EQC).
 eunit_run(Module, NumTests) ->
     erlang:group_leader(whereis(user), self()),
-    ?GMTQC:module([{numtests,NumTests}, fun ?GMTQC_GEN:noshrink/1, {on_output,silent_printer()}], Module).
+    module([{numtests,NumTests}, fun ?GMTQC_GEN:noshrink/1, {on_output,silent_printer()}], Module).
 -endif. %% -ifdef(EQC).
 
 -endif. %% -ifdef(GMTQC).

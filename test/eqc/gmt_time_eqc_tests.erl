@@ -44,7 +44,7 @@ run() ->
     run(3000).
 
 run(Num) ->
-    ?GMTQC:module({numtests,Num}, ?MODULE).
+    gmt_eqc:module({numtests,Num}, ?MODULE).
 
 dayinmonth(Y,M) ->
     NumDays = calendar:last_day_of_the_month(Y, M),
