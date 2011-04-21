@@ -127,7 +127,9 @@ erlang_system_info(C) ->
     _ = [cluster_info:format(C, " ~p:\n ~p\n\n", [I,catch erlang:system_info(I)])
          || I <- I0],
 
-    I1 = [dist, info, loaded, procs],
+    %% ENABLE FOR DEBUGGING PURPOSES ONLY
+    %% I1 = [dist, info, loaded, procs],
+    I1 = [dist, info, loaded],
     _ = [cluster_info:format(C, " ~p:\n ~s\n\n", [I, catch erlang:system_info(I)])
         || I <- I1].
 
