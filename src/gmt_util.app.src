@@ -22,7 +22,7 @@
 {application, gmt_util,
  [
   {description, "GMT util application"},
-  {vsn, "0.1.3"},
+  {vsn, "0.1.4"},
   {registered, []},
   {applications, [kernel, stdlib, sasl]},
   {mod, {gmt_util_app, []}},
