@@ -151,7 +151,7 @@ gmt_run_commands(Mod, Options)
                                                  ?LET(InitialState,initial_state(Mod),
                                                       parallel_commands(?MODULE,InitialState))),
                             ?ALWAYS(_Attempts,
-                                    ?TIMEOUT(1000,
+                                    ?TIMEOUT(5000,
                                              begin
                                                  %% commands - setup
                                                  {ok,TestRef} = Mod:commands_setup(false),
