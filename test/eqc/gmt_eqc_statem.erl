@@ -67,13 +67,7 @@ behaviour_info(callbacks) ->
 
 %%%%%%
 %% state
--record(state,
-        {
-          %% mod
-              mod
-              %% mod state
-              , mod_state
-        }).
+-record(state, {mod, mod_state}).
 
 %%%----------------------------------------------------------------------
 %%% API
@@ -106,7 +100,7 @@ gmt_run_commands(Mod, Options)
         false ->
             ?FORALL(Cmds,with_parameters(Params,
                                          ?LET(InitialState,initial_state(Mod),
-                                              commands(?MODULE,InitialState))),
+                                              more_commands(3,commands(?MODULE,InitialState)))),
                     begin
                         %% commands - setup
                         {ok,TestRef} = Mod:commands_setup(false),
@@ -147,35 +141,40 @@ gmt_run_commands(Mod, Options)
                             andalso ok =:= Mod:commands_teardown(TestRef,S#state.mod_state)))
                     end);
         true ->
-            ?FORALL(_Repetitions,?SHRINK(1,[10]),
+            %% Number of attempts to make each test case fail. When
+            %% searching for a failing example, we run each test
+            %% once. When searching for a way to shrink a test case,
+            %% we run each candidate shrinking 100 times.
+            ?FORALL(_Attempts,?SHRINK(1,[100]),
                     ?FORALL(Cmds,with_parameters(Params,
                                                  ?LET(InitialState,initial_state(Mod),
                                                       parallel_commands(?MODULE,InitialState))),
-                            ?ALWAYS(_Repetitions,
-                                    begin
-                                        %% commands - setup
-                                        {ok,TestRef} = Mod:commands_setup(false),
+                            ?ALWAYS(_Attempts,
+                                    ?TIMEOUT(1000,
+                                             begin
+                                                 %% commands - setup
+                                                 {ok,TestRef} = Mod:commands_setup(false),
 
-                                        %% commands - run
-                                        {H,HL,Res} = run_parallel_commands(?MODULE,Cmds,Params),
+                                                 %% commands - run
+                                                 {H,HL,Res} = run_parallel_commands(?MODULE,Cmds,Params),
 
-                                        %% whenfail
-                                        ?WHENFAIL(
-                                           begin
-                                               %% commands
-                                               FileName = write_commands(Cmds),
-                                               io:format("~nCOMMANDS:~n\t~p~n",[FileName]),
-                                               %% history
-                                               io:format("~nHISTORY:~n\t~p~n",[H]),
-                                               %% history list
-                                               io:format("~nHISTORY LIST:~n\t~p~n",[HL]),
-                                               %% result
-                                               io:format("~nRESULT:~n\t~p~n",[Res])
-                                           end,
-                                           (ok =:= Res
-                                            %% commands - teardown
-                                            andalso ok =:= Mod:commands_teardown(TestRef,undefined)))
-                                    end)))
+                                                 %% whenfail
+                                                 ?WHENFAIL(
+                                                    begin
+                                                        %% commands
+                                                        FileName = write_commands(Cmds),
+                                                        io:format("~nCOMMANDS:~n\t~p~n",[FileName]),
+                                                        %% history
+                                                        io:format("~nHISTORY:~n\t~p~n",[H]),
+                                                        %% history list
+                                                        io:format("~nHISTORY LIST:~n\t~p~n",[HL]),
+                                                        %% result
+                                                        io:format("~nRESULT:~n\t~p~n",[Res])
+                                                    end,
+                                                    (ok =:= Res
+                                                     %% commands - teardown
+                                                     andalso ok =:= Mod:commands_teardown(TestRef,undefined)))
+                                             end))))
     end;
 gmt_run_commands(_Mod, _Options) ->
     exit(badarg).
