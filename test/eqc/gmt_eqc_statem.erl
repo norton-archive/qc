@@ -135,10 +135,11 @@ gmt_run_commands(Mod, Options)
                                %% state is sane
                                io:format("~nSTATE IS SANE:~n\t~p~n",[state_is_sane(Mod, S)])
                            end,
-                           (ok =:= Res
-                            andalso state_is_sane(Mod, S)
-                            %% commands - teardown
-                            andalso ok =:= Mod:commands_teardown(TestRef,S#state.mod_state)))
+                           aggregate(command_names(Cmds),
+                                     (ok =:= Res
+                                      andalso state_is_sane(Mod, S)
+                                      %% commands - teardown
+                                      andalso ok =:= Mod:commands_teardown(TestRef,S#state.mod_state))))
                     end);
         true ->
             %% Number of attempts to make each test case fail. When
@@ -171,9 +172,10 @@ gmt_run_commands(Mod, Options)
                                                         %% result
                                                         io:format("~nRESULT:~n\t~p~n",[Res])
                                                     end,
-                                                    (ok =:= Res
-                                                     %% commands - teardown
-                                                     andalso ok =:= Mod:commands_teardown(TestRef,undefined)))
+                                                    aggregate(command_names(Cmds),
+                                                              (ok =:= Res
+                                                               %% commands - teardown
+                                                               andalso ok =:= Mod:commands_teardown(TestRef,undefined))))
                                              end))))
     end;
 gmt_run_commands(_Mod, _Options) ->
