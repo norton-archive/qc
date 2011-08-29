@@ -537,7 +537,12 @@ node_localid(SName) ->
         {match,[]} ->
             0;
         {match,[{Start,Length}]} ->
-            int_ify(string:substr(SName, Start+1, Length))
+            try
+                int_ify(string:substr(SName, Start+1, Length))
+            catch
+                exit:badarg ->
+                    0
+            end
     end.
 
 %% @spec (integer()) -> integer()
