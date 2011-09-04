@@ -13,34 +13,20 @@
 %%% See the License for the specific language governing permissions and
 %%% limitations under the License.
 %%%
-%%% File    : gmt_eqc_statem.erl
-%%% Purpose : Wrapper for eqc_statem.erl
+%%% File    : qc_statem.erl
+%%% Purpose : Wrapper for statem
 %%%-------------------------------------------------------------------
 
--module(gmt_eqc_statem).
+-module(qc_statem).
 
--ifdef(PROPER).
--include_lib("proper/include/proper.hrl").
--define(GMTQC, proper).
--define(GMTQC_GEN, proper_gen).
--undef(EQC).
--define(ALWAYS(_N,PROP), PROP).
--endif. %% -ifdef(PROPER).
+-include_lib("qc/include/qc.hrl").
 
--ifdef(EQC).
--include_lib("eqc/include/eqc.hrl").
--include_lib("eqc/include/eqc_statem.hrl").
--define(GMTQC, eqc).
--define(GMTQC_GEN, eqc_gen).
--undef(PROPER).
--endif. %% -ifdef(EQC).
-
--ifdef(GMTQC).
+-ifdef(QC).
 
 %% API
--export([gmt_sample_commands/1, gmt_sample_commands/2]).
--export([gmt_run_commands/1, gmt_run_commands/2]).
--export([gmt_gen_command/2]).
+-export([qc_sample_commands/1, qc_sample_commands/2]).
+-export([qc_run_commands/1, qc_run_commands/2]).
+-export([qc_gen_command/2]).
 
 %% eqc_statem Callbacks
 -export([command/1, initial_state/0, initial_state/1, next_state/3, precondition/2, postcondition/3]).
@@ -73,21 +59,21 @@ behaviour_info(callbacks) ->
 %%% API
 %%%----------------------------------------------------------------------
 
-gmt_sample_commands(Mod) ->
-    gmt_sample_commands(Mod, []).
+qc_sample_commands(Mod) ->
+    qc_sample_commands(Mod, []).
 
-gmt_sample_commands(Mod, Options)
+qc_sample_commands(Mod, Options)
   when is_atom(Mod), is_list(Options) ->
     %% commands - sample
     Params = [{mod,Mod},{options,Options}],
-    ?GMTQC_GEN:sample(with_parameters(Params,
-                                      ?LET(InitialState,initial_state(Mod),
-                                           command(InitialState)))).
+    ?QC_GEN:sample(with_parameters(Params,
+                                   ?LET(InitialState,initial_state(Mod),
+                                        command(InitialState)))).
 
-gmt_run_commands(Mod) ->
-    gmt_run_commands(Mod, []).
+qc_run_commands(Mod) ->
+    qc_run_commands(Mod, []).
 
-gmt_run_commands(Mod, Options)
+qc_run_commands(Mod, Options)
   when is_atom(Mod), is_list(Options) ->
     %% commands - setup and teardown
     {ok,TestRefOnce} = Mod:commands_setup(true),
@@ -178,10 +164,10 @@ gmt_run_commands(Mod, Options)
                                                                andalso ok =:= Mod:commands_teardown(TestRef,undefined))))
                                              end))))
     end;
-gmt_run_commands(_Mod, _Options) ->
+qc_run_commands(_Mod, _Options) ->
     exit(badarg).
 
-gmt_gen_command(Mod, ModState) ->
+qc_gen_command(Mod, ModState) ->
     Mod:command_gen(Mod, ModState).
 
 
@@ -234,4 +220,4 @@ write_commands(Cmds,FileName) ->
     ok = file:write_file(FileName, io_lib:format("~p.", [Cmds])),
     FileName.
 
--endif. %% -ifdef(GMTQC).
+-endif. %% -ifdef(QC).

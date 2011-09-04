@@ -13,25 +13,15 @@
 %%% See the License for the specific language governing permissions and
 %%% limitations under the License.
 %%%
-%%% File    : gmt_eqc_gen.erl
-%%% Purpose : GMT QuickCheck generators
+%%% File    : qc_gen.erl
+%%% Purpose : QC generators
 %%%-------------------------------------------------------------------
 
--module(gmt_eqc_gen).
+-module(qc_gen).
 
--ifdef(PROPER).
--include_lib("proper/include/proper.hrl").
--define(GMTQC, proper).
--undef(EQC).
--endif. %% -ifdef(PROPER).
+-include_lib("qc/include/qc.hrl").
 
--ifdef(EQC).
--include_lib("eqc/include/eqc.hrl").
--define(GMTQC, eqc).
--undef(PROPER).
--endif. %% -ifdef(EQC).
-
--ifdef(GMTQC).
+-ifdef(QC).
 
 -compile(export_all).
 
@@ -48,53 +38,53 @@
 
 %%%%%%
 %% atom
-gmt_atom() ->
-    gmt_atom([]).
+qc_atom() ->
+    qc_atom([]).
 
-gmt_atom(Attrs) when is_list(Attrs) ->
+qc_atom(Attrs) when is_list(Attrs) ->
     X = lists:usort(Attrs),
     StringAttrs = [ Attr || Attr <- X, Attr =/= nonundefined ],
-    oneof([ok,true,false,?LET(L,gmt_string(StringAttrs),list_to_atom(L))]
+    oneof([ok,true,false,?LET(L,qc_string(StringAttrs),list_to_atom(L))]
           ++ if StringAttrs =:= X -> [undefined]; true -> [] end).
 
 
 %%%%%%
 %% binary
-gmt_binary() ->
-    gmt_binary([]).
+qc_binary() ->
+    qc_binary([]).
 
-gmt_binary(Attrs) when is_list(Attrs) ->
-    ?LET(L,gmt_string(Attrs),list_to_binary(L)).
+qc_binary(Attrs) when is_list(Attrs) ->
+    ?LET(L,qc_string(Attrs),list_to_binary(L)).
 
 
 %%%%%%
 %% byte
-gmt_byte() ->
+qc_byte() ->
     choose(0, 255).
 
 
 %%%%%%
 %% proplist
-gmt_proplist() ->
-    gmt_proplist([]).
+qc_proplist() ->
+    qc_proplist([]).
 
-gmt_proplist(Attrs) when is_list(Attrs) ->
-    Key = gmt_atom(),
-    Val = gmt_any(),
+qc_proplist(Attrs) when is_list(Attrs) ->
+    Key = qc_atom(),
+    Val = qc_any(),
     G = {Key, Val},
-    gmt_list(G, Attrs).
+    qc_list(G, Attrs).
 
 
 %%%%%%
 %% list
-gmt_list() ->
-    G = gmt_any(),
-    gmt_list(G).
+qc_list() ->
+    G = qc_any(),
+    qc_list(G).
 
-gmt_list(G) ->
-    gmt_list(G, []).
+qc_list(G) ->
+    qc_list(G, []).
 
-gmt_list(G, Attrs) when is_list(Attrs) ->
+qc_list(G, Attrs) when is_list(Attrs) ->
     case lists:usort(Attrs) of
         [] ->
             list(G);
@@ -104,42 +94,42 @@ gmt_list(G, Attrs) when is_list(Attrs) ->
 
 %%%%%%
 %% string
-gmt_string() ->
-    gmt_string([]).
+qc_string() ->
+    qc_string([]).
 
-gmt_string(Attrs) when is_list(Attrs) ->
+qc_string(Attrs) when is_list(Attrs) ->
     case lists:usort(Attrs) of
         [] ->
-            oneof([list(gmt_byte())
+            oneof([list(qc_byte())
                    ,  ?LET(Attrs1,oneof([[nonempty], [ascii], [ascii,nonempty], [asciiprintable], [asciiprintable,nonempty], [ascii_alphanumeric], [ascii_alphanumeric, nonempty]])
-                           , gmt_string(Attrs1))
+                           , qc_string(Attrs1))
                   ]);
         [nonempty] ->
-            gmt_list(gmt_byte(),[nonempty]);
+            qc_list(qc_byte(),[nonempty]);
         [CharAttr] ->
-            list(gmt_char([CharAttr]));
+            list(qc_char([CharAttr]));
         [CharAttr, nonempty] when is_atom(CharAttr) ->
-            gmt_list(gmt_char([CharAttr]),[nonempty])
+            qc_list(qc_char([CharAttr]),[nonempty])
     end.
 
 
 %%%%%%
 %% term
-gmt_term() ->
-    gmt_term([]).
+qc_term() ->
+    qc_term([]).
 
-gmt_term(Attrs) ->
-    gmt_any(Attrs).
+qc_term(Attrs) ->
+    qc_any(Attrs).
 
 
 %%%%%%
 %% tuple
-gmt_tuple() ->
-    gmt_tuple([]).
+qc_tuple() ->
+    qc_tuple([]).
 
-gmt_tuple(Attrs) when is_list(Attrs) ->
-    G = gmt_any(),
-    ?LET(L,gmt_list(G, Attrs),
+qc_tuple(Attrs) when is_list(Attrs) ->
+    G = qc_any(),
+    ?LET(L,qc_list(G, Attrs),
          list_to_tuple(L)).
 
 
@@ -150,10 +140,10 @@ gmt_tuple(Attrs) when is_list(Attrs) ->
 
 %%%%%
 %% any
-gmt_any() ->
-    gmt_any([]).
+qc_any() ->
+    qc_any([]).
 
-gmt_any(Attrs) ->
+qc_any(Attrs) ->
     %% ISSUE: This will fall into an infinite loop, because of incompatibilities
     %%        in size distribution.
     %% BONUS: Can also try the predefined any() type.
@@ -162,23 +152,23 @@ gmt_any(Attrs) ->
            [] ->
                %% @todo must be a better definition!!!
                oneof([
-                      gmt_atom(), gmt_string(), gmt_binary(), gmt_tuple(), gmt_list(), gmt_proplist(), gmt_term()
+                      qc_atom(), qc_string(), qc_binary(), qc_tuple(), qc_list(), qc_proplist(), qc_term()
                       ,  ?LET(Attrs1,oneof([[nonempty], [nonundefined], [nonempty,nonundefined]])
-                              , gmt_any(Attrs1))
+                              , qc_any(Attrs1))
                      ]);
            [nonempty] ->
-               oneof([gmt_atom(X), gmt_string(X), gmt_binary(X), gmt_tuple(X), gmt_list(X), gmt_proplist(X), gmt_term(X)]);
+               oneof([qc_atom(X), qc_string(X), qc_binary(X), qc_tuple(X), qc_list(X), qc_proplist(X), qc_term(X)]);
            [nonundefined] ->
-               oneof([gmt_atom(X), gmt_string(), gmt_binary(), gmt_tuple(), gmt_list(), gmt_proplist(), gmt_term(X)]);
+               oneof([qc_atom(X), qc_string(), qc_binary(), qc_tuple(), qc_list(), qc_proplist(), qc_term(X)]);
            [nonempty,nonundefined] ->
                Y = [nonempty],
-               oneof([gmt_atom(X), gmt_string(Y), gmt_binary(Y), gmt_tuple(Y), gmt_list(Y), gmt_proplist(Y), gmt_term(X)])
+               oneof([qc_atom(X), qc_string(Y), qc_binary(Y), qc_tuple(Y), qc_list(Y), qc_proplist(Y), qc_term(X)])
        end).
 
 
 %%%%%%
 %% char
-gmt_char(Attrs) when is_list(Attrs) ->
+qc_char(Attrs) when is_list(Attrs) ->
     case lists:usort(Attrs) of
         [ascii] ->
             choose(0,127);
@@ -195,67 +185,67 @@ gmt_char(Attrs) when is_list(Attrs) ->
 
 %%%%%%
 %% timeout - avoid a real timeout by starting from 100 sec
-gmt_timeout() ->
+qc_timeout() ->
     oneof([infinity,choose(100000,10000000)]).
 
-gmt_timeout(Attrs) when is_list(Attrs) ->
+qc_timeout(Attrs) when is_list(Attrs) ->
     case lists:usort(Attrs) of
         [noninfinite] ->
             choose(100000,10000000);
         [] ->
-            gmt_timeout()
+            qc_timeout()
     end.
 
 
 %%%%%%
 %% expires
-gmt_expires() ->
-    ?LET(Timeout,gmt_timeout(),gmt_time:make_expires(Timeout)).
+qc_expires() ->
+    ?LET(Timeout,qc_timeout(),qc_time:make_expires(Timeout)).
 
-gmt_expires(Attrs) when is_list(Attrs) ->
+qc_expires(Attrs) when is_list(Attrs) ->
     case X = lists:usort(Attrs) of
         [noninfinite] ->
-            ?LET(Timeout,gmt_timeout(X),gmt_time:make_expires(Timeout));
+            ?LET(Timeout,qc_timeout(X),qc_time:make_expires(Timeout));
         [] ->
-            gmt_timeout()
+            qc_timeout()
     end.
 
 
 %%%%%%
 %% timeout_or_expires
-gmt_timeout_or_expires() ->
-    ?LET(Timeout,gmt_timeout(),oneof([Timeout,gmt_time:make_expires(Timeout)])).
+qc_timeout_or_expires() ->
+    ?LET(Timeout,qc_timeout(),oneof([Timeout,qc_time:make_expires(Timeout)])).
 
-gmt_timeout_or_expires(Attrs) when is_list(Attrs) ->
+qc_timeout_or_expires(Attrs) when is_list(Attrs) ->
     case X = lists:usort(Attrs) of
         [noninfinite] ->
-            ?LET(Timeout,gmt_timeout(X),oneof([Timeout,gmt_time:make_expires(Timeout)]));
+            ?LET(Timeout,qc_timeout(X),oneof([Timeout,qc_time:make_expires(Timeout)]));
         [] ->
-            gmt_timeout_or_expires()
+            qc_timeout_or_expires()
     end.
 
 
 %%%%%%
 %% Bool
 %% @spec syntactic sugar for bool(), true/false value could be set
-%%         thru proplist Attrs. (Also a better way for gmt_choose if there are
+%%         thru proplist Attrs. (Also a better way for qc_choose if there are
 %%         only 2 items) For examples:
 %%         Attrs = [{true, 1}, {false, 0}].
 %%         Attrs = [{true, "1"}, {false, "0"}]
 %%         Attrs = [{true, "true"}, {false, "false"}]
 %%         Attrs = [{true, "dog"}, {false, "cat"}]
 %%         Attrs = [{true, ok}, {false, ng}]
-gmt_bool(Attrs) ->
+qc_bool(Attrs) ->
     ?LET(Bool, bool(), proplists:get_value(Bool, Attrs, Bool)).
 
-gmt_bool(True, False) ->
-    gmt_bool([{true, True}, {false, False}]).
+qc_bool(True, False) ->
+    qc_bool([{true, True}, {false, False}]).
 
 
 %%%%%%
 %% integer
 %% TODO(gki): make attr: [length, min, max, base]
-gmt_int_list(Length, Base) ->
+qc_int_list(Length, Base) ->
     Range = round(math:pow(Base, Length)) - 1, % int() is too small
     %% BONUS: Can also try the predefined integer() type.
     ?SUCHTHAT(L,
@@ -268,31 +258,31 @@ gmt_int_list(Length, Base) ->
 %% varchar() -> random size nonempty ascii aphanumeric string
 %% varchar(S) -> fixed size nonempty ascii aphanumeric string
 %% varchar(Min, Max) -> ranged nonempty ascii aphanumeric string
-gmt_varchar() ->
-    gmt_string([ascii_alphanumeric, nonempty]).
+qc_varchar() ->
+    qc_string([ascii_alphanumeric, nonempty]).
 
-gmt_varchar(0) ->
+qc_varchar(0) ->
     [];
-gmt_varchar(S) when is_integer(S) ->
-    gmt_varchar(S, S).
+qc_varchar(S) when is_integer(S) ->
+    qc_varchar(S, S).
 
-gmt_varchar(Min, Max) when is_integer(Min) andalso is_integer(Max) ->
-    gmt_varchar(Min, Max, []).
+qc_varchar(Min, Max) when is_integer(Min) andalso is_integer(Max) ->
+    qc_varchar(Min, Max, []).
 
-gmt_varchar(_, Max, Buffer) when length(Buffer) > Max ->
+qc_varchar(_, Max, Buffer) when length(Buffer) > Max ->
     string:substr(Buffer, 1, Max);
-gmt_varchar(Min, Max, Buffer) when length(Buffer) < Min ->
-    ?LET(S, gmt_varchar(), gmt_varchar(Min, Max, Buffer ++ S));
-gmt_varchar(_, _, Buffer) ->
+qc_varchar(Min, Max, Buffer) when length(Buffer) < Min ->
+    ?LET(S, qc_varchar(), qc_varchar(Min, Max, Buffer ++ S));
+qc_varchar(_, _, Buffer) ->
     Buffer.
 
 
 %%%%%%
 %% time
-gmt_date_yymmdd() ->
-    ?LET({Y,M}, {choose(0, 99), choose(1, 12)}, gmt_date_yymmdd(Y, M)).
+qc_date_yymmdd() ->
+    ?LET({Y,M}, {choose(0, 99), choose(1, 12)}, qc_date_yymmdd(Y, M)).
 
-gmt_date_yymmdd(Y, M) when is_integer(Y) andalso is_integer(M) ->
+qc_date_yymmdd(Y, M) when is_integer(Y) andalso is_integer(M) ->
     NumDays = calendar:last_day_of_the_month(Y, M),
     ?LET(D, choose(1, NumDays),
          string:right(integer_to_list(Y), 2, $0) ++
@@ -301,18 +291,18 @@ gmt_date_yymmdd(Y, M) when is_integer(Y) andalso is_integer(M) ->
         ).
 
 
-gmt_time_hhmmss() ->
+qc_time_hhmmss() ->
     ?LET({H,M,S}, {choose(0, 23), choose(0, 59), choose(0, 59)},
          string:right(integer_to_list(H), 2, $0) ++
              string:right(integer_to_list(M), 2, $0) ++
              string:right(integer_to_list(S), 2, $0)).
 
 
-gmt_time_hhmmssms() ->
+qc_time_hhmmssms() ->
     ?LET({H,M,S,Ms}, {choose(0, 23), choose(0, 59), choose(0, 59), choose(0, 999)},
          string:right(integer_to_list(H), 2, $0) ++
              string:right(integer_to_list(M), 2, $0) ++
              string:right(integer_to_list(S), 2, $0) ++
              string:right(integer_to_list(Ms), 3, $0)).
 
--endif. %% -ifdef(GMTQC).
+-endif. %% -ifdef(QC).

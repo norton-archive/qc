@@ -13,27 +13,15 @@
 %%% See the License for the specific language governing permissions and
 %%% limitations under the License.
 %%%
-%%% File    : gmt_eqc.erl
-%%% Purpose : Wrapper for eqc.erl
+%%% File    : qc.erl
+%%% Purpose : Wrapper for QuickCheck and Proper
 %%%-------------------------------------------------------------------
 
--module(gmt_eqc).
+-module(qc).
 
--ifdef(PROPER).
--include_lib("proper/include/proper.hrl").
--define(GMTQC, proper).
--define(GMTQC_GEN, proper_gen).
--undef(EQC).
--endif. %% -ifdef(PROPER).
+-include("qc.hrl").
 
--ifdef(EQC).
--include_lib("eqc/include/eqc.hrl").
--define(GMTQC, eqc).
--define(GMTQC_GEN, eqc_gen).
--undef(PROPER).
--endif. %% -ifdef(EQC).
-
--ifdef(GMTQC).
+-ifdef(QC).
 -include_lib("eunit/include/eunit.hrl").
 
 -export([module/2]).
@@ -83,7 +71,7 @@ silent_printer() ->
 
 %% @doc Write failing counterexamples for specified Module
 write_counterexamples(Module) ->
-    write_counterexamples(Module, ?GMTQC:counterexamples()).
+    write_counterexamples(Module, ?QC:counterexamples()).
 
 write_counterexamples(Module, CounterExamples) ->
     write_counterexamples(Module, CounterExamples, calendar:local_time()).
@@ -140,7 +128,7 @@ eunit_run(Module, NumTests) ->
 -ifdef(EQC).
 eunit_run(Module, NumTests) ->
     erlang:group_leader(whereis(user), self()),
-    module([{numtests,NumTests}, fun ?GMTQC_GEN:noshrink/1, {on_output,silent_printer()}], Module).
+    module([{numtests,NumTests}, fun ?QC_GEN:noshrink/1, {on_output,silent_printer()}], Module).
 -endif. %% -ifdef(EQC).
 
--endif. %% -ifdef(GMTQC).
+-endif. %% -ifdef(QC).
