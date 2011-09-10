@@ -22,6 +22,7 @@
 
 -ifdef(PROPER).
 -include_lib("proper/include/proper.hrl").
+-undef(QC).
 -define(QC, proper).
 -define(QC_GEN, proper_gen).
 -define(ALWAYS(_N,PROP), PROP).
@@ -31,6 +32,7 @@
 -ifdef(EQC).
 -include_lib("eqc/include/eqc.hrl").
 -include_lib("eqc/include/eqc_statem.hrl").
+-undef(QC).
 -define(QC, eqc).
 -define(QC_GEN, eqc_gen).
 -undef(PROPER).
