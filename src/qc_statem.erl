@@ -48,20 +48,24 @@ behaviour_info(callbacks) ->
     ].
 
 %%%----------------------------------------------------------------------
-%%% records
+%%% types and records
 %%%----------------------------------------------------------------------
 
-%%%%%%
-%% state
--record(state, {mod, mod_state}).
+-type proplist() :: [atom() | {atom(), term()}].
+
+-opaque modstate() :: term().
+
+-record(state, {mod :: module(), mod_state :: modstate()}).
 
 %%%----------------------------------------------------------------------
 %%% API
 %%%----------------------------------------------------------------------
 
+-spec qc_sample_commands(module()) -> any().
 qc_sample_commands(Mod) ->
     qc_sample_commands(Mod, []).
 
+-spec qc_sample_commands(module(), proplist()) -> any().
 qc_sample_commands(Mod, Options)
   when is_atom(Mod), is_list(Options) ->
     %% commands - sample
@@ -70,9 +74,11 @@ qc_sample_commands(Mod, Options)
                                    ?LET(InitialState,initial_state(Mod),
                                         command(InitialState)))).
 
+-spec qc_run_commands(module()) -> any().
 qc_run_commands(Mod) ->
     qc_run_commands(Mod, []).
 
+-spec qc_run_commands(module(), proplist()) -> any().
 qc_run_commands(Mod, Options)
   when is_atom(Mod), is_list(Options) ->
     %% commands - setup and teardown
@@ -167,6 +173,7 @@ qc_run_commands(Mod, Options)
 qc_run_commands(_Mod, _Options) ->
     exit(badarg).
 
+-spec qc_gen_command(module(), modstate()) -> any().
 qc_gen_command(Mod, ModState) ->
     Mod:command_gen(Mod, ModState).
 
