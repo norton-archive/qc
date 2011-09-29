@@ -28,6 +28,7 @@
   {mod, {qc_app, []}},
   {modules, [qc
              , qc_gen
+             , qc_slave
              , qc_statem
             ]},
   {env, []}
