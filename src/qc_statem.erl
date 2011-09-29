@@ -87,7 +87,7 @@ qc_run_commands(Mod, Options)
 
     %% commands - loop
     Parallel = proplists:get_bool(parallel, Options),
-    Params = [{parallel,Parallel},{mod,Mod},{options,Options}],
+    Params = [{parallel,Parallel},{mod,Mod},{options,proplists:delete(parallel, Options)}],
     case Parallel of
         false ->
             ?FORALL(Cmds,with_parameters(Params,
