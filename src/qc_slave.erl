@@ -38,8 +38,8 @@
 -module(qc_slave).
 
 %% API
--export([start_slave/1, restart_slave/1]).
--export([start_slaves/1, restart_slaves/1]).
+-export([start_slave/1, restart_slave/1, stop_slave/1]).
+-export([start_slaves/1, restart_slaves/1, stop_slaves/1]).
 
 
 %%%----------------------------------------------------------------------
@@ -52,15 +52,21 @@ start_slave(Name) ->
 restart_slave(Name) ->
     restart(Name).
 
-start_slaves(Ns) when is_list(Ns) ->
-    [H|T] = Nodes = [start(N) || N <- Ns],
+stop_slave(Name) ->
+    stop(Name).
+
+start_slaves(Names) when is_list(Names) ->
+    [H|T] = Nodes = [start(N) || N <- Names],
     _ = [rpc:call(H, net_adm, ping, [N]) || N <- T],
     Nodes.
 
-restart_slaves(Ns) when is_list(Ns) ->
-    [H|T] = Nodes = [restart(N)  || N <- Ns],
+restart_slaves(Names) when is_list(Names) ->
+    [H|T] = Nodes = [restart(N) || N <- Names],
     _ = [rpc:call(H, net_adm, ping, [N]) || N <- T],
     Nodes.
+
+stop_slaves(Names) when is_list(Names) ->
+    [stop(N) || N <- Names].
 
 
 %%%----------------------------------------------------------------------
@@ -82,6 +88,9 @@ restart(Name) ->
         {error, {already_running, Node}} ->
             Node
     end.
+
+stop(Name) ->
+    slave:stop(slave(Name)).
 
 init() ->
     case node() of
@@ -113,3 +122,8 @@ paths() ->
 host() ->
     [_Name, Host] = re:split(atom_to_list(node()), "@", [{return, list}]),
     list_to_atom(Host).
+
+slave(Name) when is_atom(Name) ->
+    slave(atom_to_list(Name));
+slave(Name) when is_list(Name) ->
+    list_to_atom(Name ++ "@" ++ atom_to_list(host())).
