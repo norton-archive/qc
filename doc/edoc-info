@@ -1,0 +1,3 @@
+{application,qc}.
+{packages,[]}.
+{modules,[qc,qc_gen,qc_slave,qc_statem]}.

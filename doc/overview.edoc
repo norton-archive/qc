@@ -1,0 +1,69 @@
+%% -*- Doc -*-
+%% vim: set syntax=asciidoc:
+@author Joseph Wayne Norton <norton@alum.mit.edu>
+@copyright 2011 by Gemini Mobile Technologies, Inc.
+@title QC - Wrappers for QuickCheck and Proper testing tools
+@doc
+QC is an Erlang application that provides a set of wrappers for
+QuickCheck and Proper testing tools.
+
+_This repository is a "work-in-progress" - please contribute if you
+find QC useful._
+
+== Quick Start Recipe
+
+To download and build the qc application in one shot, please follow
+this recipe:
+
+------
+$ mkdir working-directory-name
+$ cd working-directory-name
+$ git clone git://github.com/norton/qc.git qc
+$ cd qc
+$ ./rebar get-deps
+$ ./rebar clean
+$ ./rebar compile
+$ ./rebar skip_deps=true doc
+------
+
+== Documentation
+
+=== Where should I start?
+
+This README is the only bit of documentation right now.
+
+Please see https://github.com/norton/lets for an Erlang application
+that has been developed and tested by using *only* QC.
+
+TIP: By default, QC is enabled for testing via Proper.  If you would
+like to enable QC for testing via QuickCheck, please contact the
+author for instructions.
+
+=== What is QuickCheck?
+
+QuickCheck is a commercial property-based testing tool for Erlang.
+
+- A _language_ for stating properties of programs (implemented as a
+  library of functions and macros).
+- A _tool_ for testing properties in randomly generated cases.
+
+See http://www.quviq.com/ for further details.
+
+=== What is Proper?
+
+PropEr (PROPerty-based testing tool for ERlang) is a
+QuickCheck-inspired open-source property-based testing tool for
+Erlang.
+
+See http://proper.softlab.ntua.gr/ for further details.
+
+== Roadmap
+
+- Documentation and Examples
+
+- Rebar Integration via Plugin
+  (https://github.com/norton/rebar_plugins/blob/master/rebar_qc.erl)
+
+- PropEr resize issue (https://github.com/manopapad/proper/issues/10)
+
+@end

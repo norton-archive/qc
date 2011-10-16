@@ -227,14 +227,17 @@ qc_timeout_or_expires(Attrs) when is_list(Attrs) ->
 
 %%%%%%
 %% Bool
-%% @spec syntactic sugar for bool(), true/false value could be set
-%%         thru proplist Attrs. (Also a better way for qc_choose if there are
-%%         only 2 items) For examples:
-%%         Attrs = [{true, 1}, {false, 0}].
-%%         Attrs = [{true, "1"}, {false, "0"}]
-%%         Attrs = [{true, "true"}, {false, "false"}]
-%%         Attrs = [{true, "dog"}, {false, "cat"}]
-%%         Attrs = [{true, ok}, {false, ng}]
+%%
+%% syntactic sugar for bool(), true/false value could be set thru
+%% proplist Attrs (Also a better way for qc_choose if there are only 2
+%% items).
+%%
+%% For examples:
+%% Attrs = [{true, 1}, {false, 0}].
+%% Attrs = [{true, "1"}, {false, "0"}]
+%% Attrs = [{true, "true"}, {false, "false"}]
+%% Attrs = [{true, "dog"}, {false, "cat"}]
+%% Attrs = [{true, ok}, {false, ng}]
 qc_bool(Attrs) ->
     ?LET(Bool, bool(), proplists:get_value(Bool, Attrs, Bool)).
 
