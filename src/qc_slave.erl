@@ -95,7 +95,7 @@ stop(Name) ->
 init() ->
     case node() of
         nonode@nohost ->
-            os:cmd("epmd -daemon"),
+            _ = os:cmd("epmd -daemon"),
             {ok, _} = net_kernel:start([?MODULE, shortnames]),
             ok;
         _ ->

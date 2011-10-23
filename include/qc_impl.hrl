@@ -13,16 +13,41 @@
 %%% See the License for the specific language governing permissions and
 %%% limitations under the License.
 %%%
-%%% File    : qc.hrl
-%%% Purpose : Wrapper for QuickCheck and Proper
+%%% File    : qc_impl.hrl
+%%% Purpose : Wrapper for QuickCheck and Proper Implementations
 %%%-------------------------------------------------------------------
 
--ifndef(qc).
--define(qc, true).
+-ifndef(qc_impl).
+-define(qc_impl, true).
 
--include("qc_impl.hrl").
+-ifdef(QC_PROPER).
+-undef(PROPER).
+-define(PROPER, true).
+-undef(EQC).
+-endif.
 
--import(qc_gen, [ulist/1]).
+-ifdef(QC_EQC).
+-undef(EQC).
+-define(EQC, true).
+-undef(PROPER).
+-endif.
 
--endif. %% -ifdef(qc).
+-ifdef(PROPER).
+-include_lib("proper/include/proper.hrl").
+-undef(QC).
+-define(QC, proper).
+-define(QC_GEN, proper_gen).
+-define(ALWAYS(_N,PROP), PROP).
+-undef(EQC).
+-endif. %% -ifdef(PROPER).
 
+-ifdef(EQC).
+-include_lib("eqc/include/eqc.hrl").
+-include_lib("eqc/include/eqc_statem.hrl").
+-undef(QC).
+-define(QC, eqc).
+-define(QC_GEN, eqc_gen).
+-undef(PROPER).
+-endif. %% -ifdef(EQC).
+
+-endif. %% -ifdef(qc_impl).

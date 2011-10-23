@@ -19,9 +19,9 @@
 
 -module(qc_statem).
 
--include_lib("qc/include/qc.hrl").
-
 -ifdef(QC).
+
+-include("qc_impl.hrl").
 
 %% API
 -export([qc_sample_commands/1, qc_sample_commands/2]).
@@ -108,18 +108,18 @@ qc_run_commands(Mod, Options)
                                io:format("~nCOMMANDS:~n\t~p~n",[FileName]),
                                %% history
                                io:format("~nHISTORY:"),
-                               if
-                                   length(H) < 1 ->
-                                       io:format(" none~n");
-                                   true ->
-                                       CmdsH = zip(tl(Cmds),H),
-                                       [ begin
-                                             {Cmd,{State,Reply}} = lists:nth(N,CmdsH),
-                                             io:format("~n #~p:~n\tCmd: ~p~n\tReply: ~p~n\tState: ~p~n",
-                                                       [N,Cmd,Reply,State])
-                                         end
-                                         || N <- lists:seq(1,length(CmdsH)) ]
-                               end,
+                               _ = if
+                                       length(H) < 1 ->
+                                           io:format(" none~n");
+                                       true ->
+                                           CmdsH = zip(tl(Cmds),H),
+                                           [ begin
+                                                 {Cmd,{State,Reply}} = lists:nth(N,CmdsH),
+                                                 io:format("~n #~p:~n\tCmd: ~p~n\tReply: ~p~n\tState: ~p~n",
+                                                           [N,Cmd,Reply,State])
+                                             end
+                                             || N <- lists:seq(1,length(CmdsH)) ]
+                                   end,
                                %% result
                                io:format("~nRESULT:~n\t~p~n",[Res]),
                                %% state

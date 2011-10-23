@@ -19,12 +19,11 @@
 
 -module(qc_gen).
 
--include_lib("qc/include/qc.hrl").
-
--ifdef(QC).
-
 -compile(export_all).
 
+-include("qc_impl.hrl").
+
+-ifdef(QC).
 
 %% helper for sizing down recursive generators
 -define(SIZEDOWN(G),
@@ -34,6 +33,11 @@
 %%%-------------------------------------------------------------------
 %%% Base Generators
 %%%
+
+%%%%%%
+%% ulist
+ulist(G) ->
+    ?LET(Xs, list(G), Xs -- (Xs -- lists:usort(Xs))).
 
 
 %%%%%%
