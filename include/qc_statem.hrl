@@ -76,7 +76,7 @@ counterexample_commands(Options, CounterExample) ->
 %% counterexample commands read
 counterexample_commands_read(FileName) ->
     {ok, CounterExample} = file:consult(FileName),
-    counterexample_commands(CounterExample).
+    counterexample_commands([], CounterExample).
 
 %% counterexample commands write
 counterexample_commands_write(FileName) ->
