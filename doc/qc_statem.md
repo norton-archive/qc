@@ -9,6 +9,10 @@
 
 
 
+
+__This module defines the `qc_statem` behaviour.__
+<br></br>
+ Required callback functions: `command_gen/2`, `initial_state/0`, `state_is_sane/1`, `next_state/3`, `precondition/2`, `postcondition/3`, `commands_setup/1`, `commands_teardown/1`, `commands_teardown/2`.
 <a name="types"></a>
 
 ##Data Types##

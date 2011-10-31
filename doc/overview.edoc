@@ -35,10 +35,6 @@ This README is the only bit of documentation right now.
 Please see https://github.com/norton/lets for an Erlang application
 that has been developed and tested by using *only* QC.
 
-TIP: By default, QC is enabled for testing via Proper.  If you would
-like to enable QC for testing via QuickCheck, please contact the
-author for instructions.
-
 === What is QuickCheck?
 
 QuickCheck is a commercial property-based testing tool for Erlang.
