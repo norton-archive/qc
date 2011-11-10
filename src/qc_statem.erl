@@ -45,6 +45,7 @@ behaviour_info(callbacks) ->
      , {commands_setup,1}
      , {commands_teardown,1}
      , {commands_teardown,2}
+     , {commands_aggregate,1}
     ].
 
 %%%----------------------------------------------------------------------
@@ -100,6 +101,11 @@ qc_run_commands(Mod, Options)
                         %% commands - run
                         {H,S,Res} = run_commands(?MODULE,Cmds,Params),
 
+                        %% commands - history
+                        Fun = fun({Cmd,{State,Reply}},{N,Acc}) -> {N+1,[{N,Cmd,Reply,State}|Acc]} end,
+                        {_, RevCmdsH} = lists:foldl(Fun, {1,[]}, zip(tl(Cmds),H)),
+                        CmdsH = lists:reverse(RevCmdsH),
+
                         %% whenfail
                         ?WHENFAIL(
                            begin
@@ -109,16 +115,12 @@ qc_run_commands(Mod, Options)
                                %% history
                                io:format("~nHISTORY:"),
                                _ = if
-                                       length(H) < 1 ->
+                                       length(CmdsH) < 1 ->
                                            io:format(" none~n");
                                        true ->
-                                           CmdsH = zip(tl(Cmds),H),
-                                           [ begin
-                                                 {Cmd,{State,Reply}} = lists:nth(N,CmdsH),
-                                                 io:format("~n #~p:~n\tCmd: ~p~n\tReply: ~p~n\tState: ~p~n",
-                                                           [N,Cmd,Reply,State])
-                                             end
-                                             || N <- lists:seq(1,length(CmdsH)) ]
+                                           [ io:format("~n #~p:~n\tCmd: ~p~n\tReply: ~p~n\tState: ~p~n",
+                                                       [N,Cmd,Reply,State])
+                                             || {N,Cmd,Reply,State} <- CmdsH ]
                                    end,
                                %% result
                                io:format("~nRESULT:~n\t~p~n",[Res]),
@@ -127,7 +129,7 @@ qc_run_commands(Mod, Options)
                                %% state is sane
                                io:format("~nSTATE IS SANE:~n\t~p~n",[state_is_sane(Mod, S)])
                            end,
-                           aggregate(command_names(Cmds),
+                           aggregate(Mod:commands_aggregate(CmdsH),
                                      (ok =:= Res
                                       andalso state_is_sane(Mod, S)
                                       %% commands - teardown
