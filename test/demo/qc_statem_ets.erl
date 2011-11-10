@@ -216,7 +216,12 @@ commands_teardown(Ref, _State) ->
 -spec commands_aggregate([{integer(), term(), term(), #state{}}])
                         -> [{atom(), atom(), integer() | term()}].
 commands_aggregate(L) ->
-    [ Cmd || {_N,Cmd,_Reply,_State} <- L ].
+    [ {Cmd,filter_reply(Reply)} || {_N,{set,_,{call,_,Cmd,_}},Reply,_State} <- L ].
+
+filter_reply({'EXIT',{Err,_}}) ->
+    {error,Err};
+filter_reply(_) ->
+    ok.
 
 
 %%%----------------------------------------------------------------------
