@@ -14,7 +14,7 @@
 %%% limitations under the License.
 %%%
 %%% File    : qc_statem_ets.erl
-%%% Purpose : Demo for QuickCheck and PropEr StateM(achine)
+%%% Purpose : ETS test for QuickCheck and PropEr StateM(achine)
 %%%-------------------------------------------------------------------
 
 -module(qc_statem_ets).
