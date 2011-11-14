@@ -21,10 +21,10 @@
 -define(qc_statem, true).
 
 %% API
--export([run/0, run/1, run/2]).
--export([sample_commands/0, sample_commands/1, prop_commands/0, prop_commands/1]).
--export([counterexample_commands/0, counterexample_commands/1, counterexample_commands/2]).
--export([counterexample_commands_read/1, counterexample_commands_write/1, counterexample_commands_write/2]).
+-export([qc_run/0, qc_run/1, qc_run/2]).
+-export([qc_sample/0, qc_sample/1, qc_prop/0, qc_prop/1]).
+-export([qc_counterexample/0, qc_counterexample/1, qc_counterexample/2]).
+-export([qc_counterexample_read/1, qc_counterexample_write/1, qc_counterexample_write/2]).
 
 -include("qc.hrl").
 
@@ -32,57 +32,57 @@
 %%% API
 %%%----------------------------------------------------------------------
 
--spec run() -> boolean().
-run() ->
-    run(500).
+-spec qc_run() -> boolean().
+qc_run() ->
+    qc_run(500).
 
--spec run(non_neg_integer()) -> boolean().
-run(NumTests) ->
-    run(NumTests, []).
+-spec qc_run(non_neg_integer()) -> boolean().
+qc_run(NumTests) ->
+    qc_run(NumTests, []).
 
--spec run(non_neg_integer(), [parallel | noshrink]) -> boolean().
-run(NumTests, Options) ->
+-spec qc_run(non_neg_integer(), [parallel | noshrink]) -> boolean().
+qc_run(NumTests, Options) ->
     case proplists:get_bool(noshrink, Options) of
         false ->
-            ?QC:quickcheck(numtests(NumTests,prop_commands(Options)));
+            ?QC:quickcheck(numtests(NumTests,qc_prop(Options)));
         true ->
-            ?QC:quickcheck(numtests(NumTests,noshrink(prop_commands(lists:delete(noshrink, Options)))))
+            ?QC:quickcheck(numtests(NumTests,noshrink(qc_prop(lists:delete(noshrink, Options)))))
     end.
 
-%% sample commands
-sample_commands() ->
-    sample_commands([]).
+%% sample
+qc_sample() ->
+    qc_sample([]).
 
-sample_commands(Options) ->
-    qc_statem:qc_sample_commands(?MODULE, Options).
+qc_sample(Options) ->
+    qc_statem:qc_sample(?MODULE, Options).
 
-%% prop commands
-prop_commands() ->
-    prop_commands([]).
+%% prop
+qc_prop() ->
+    qc_prop([]).
 
-prop_commands(Options) ->
-    qc_statem:qc_run_commands(?MODULE, Options).
+qc_prop(Options) ->
+    qc_statem:qc_prop(?MODULE, Options).
 
-%% counterexample commands
-counterexample_commands() ->
-    counterexample_commands([]).
+%% counterexample
+qc_counterexample() ->
+    qc_counterexample([]).
 
-counterexample_commands(Options) ->
-    counterexample_commands(Options, ?QC:counterexample()).
+qc_counterexample(Options) ->
+    qc_counterexample(Options, ?QC:counterexample()).
 
-counterexample_commands(Options, CounterExample) ->
-    ?QC:check(prop_commands(Options), CounterExample).
+qc_counterexample(Options, CounterExample) ->
+    ?QC:check(qc_prop(Options), CounterExample).
 
-%% counterexample commands read
-counterexample_commands_read(FileName) ->
+%% counterexample read
+qc_counterexample_read(FileName) ->
     {ok, CounterExample} = file:consult(FileName),
-    counterexample_commands([], CounterExample).
+    qc_counterexample([], CounterExample).
 
-%% counterexample commands write
-counterexample_commands_write(FileName) ->
-    counterexample_commands_write(FileName, ?QC:counterexample()).
+%% counterexample write
+qc_counterexample_write(FileName) ->
+    qc_counterexample_write(FileName, ?QC:counterexample()).
 
-counterexample_commands_write(FileName, CounterExample) ->
+qc_counterexample_write(FileName, CounterExample) ->
     file:write_file(FileName, io_lib:format("~p.", [CounterExample])).
 
 -endif. %% -ifdef(qc_statem).

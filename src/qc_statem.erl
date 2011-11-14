@@ -24,8 +24,8 @@
 -include("qc_impl.hrl").
 
 %% API
--export([qc_sample_commands/1, qc_sample_commands/2]).
--export([qc_run_commands/1, qc_run_commands/2]).
+-export([qc_sample/1, qc_sample/2]).
+-export([qc_prop/1, qc_prop/2]).
 -export([qc_gen_command/2]).
 
 %% eqc_statem Callbacks
@@ -42,10 +42,10 @@ behaviour_info(callbacks) ->
      , {next_state,3}
      , {precondition,2}
      , {postcondition,3}
-     , {commands_setup,1}
-     , {commands_teardown,1}
-     , {commands_teardown,2}
-     , {commands_aggregate,1}
+     , {setup,1}
+     , {teardown,1}
+     , {teardown,2}
+     , {aggregate,1}
     ].
 
 %%%----------------------------------------------------------------------
@@ -62,31 +62,31 @@ behaviour_info(callbacks) ->
 %%% API
 %%%----------------------------------------------------------------------
 
--spec qc_sample_commands(module()) -> any().
-qc_sample_commands(Mod) ->
-    qc_sample_commands(Mod, []).
+-spec qc_sample(module()) -> any().
+qc_sample(Mod) ->
+    qc_sample(Mod, []).
 
--spec qc_sample_commands(module(), proplist()) -> any().
-qc_sample_commands(Mod, Options)
+-spec qc_sample(module(), proplist()) -> any().
+qc_sample(Mod, Options)
   when is_atom(Mod), is_list(Options) ->
-    %% commands - sample
+    %% sample
     Params = [{mod,Mod},{options,Options}],
     ?QC_GEN:sample(with_parameters(Params,
                                    ?LET(InitialState,initial_state(Mod),
                                         command(InitialState)))).
 
--spec qc_run_commands(module()) -> any().
-qc_run_commands(Mod) ->
-    qc_run_commands(Mod, []).
+-spec qc_prop(module()) -> any().
+qc_prop(Mod) ->
+    qc_prop(Mod, []).
 
--spec qc_run_commands(module(), proplist()) -> any().
-qc_run_commands(Mod, Options)
+-spec qc_prop(module(), proplist()) -> any().
+qc_prop(Mod, Options)
   when is_atom(Mod), is_list(Options) ->
-    %% commands - setup and teardown
-    {ok,TestRefOnce} = Mod:commands_setup(true),
-    ok = Mod:commands_teardown(TestRefOnce),
+    %% setup and teardown
+    {ok,TestRefOnce} = Mod:setup(true),
+    ok = Mod:teardown(TestRefOnce),
 
-    %% commands - loop
+    %% loop
     Parallel = proplists:get_bool(parallel, Options),
     Params = [{parallel,Parallel},{mod,Mod},{options,proplists:delete(parallel, Options)}],
     case Parallel of
@@ -95,13 +95,13 @@ qc_run_commands(Mod, Options)
                                          ?LET(InitialState,initial_state(Mod),
                                               more_commands(3,commands(?MODULE,InitialState)))),
                     begin
-                        %% commands - setup
-                        {ok,TestRef} = Mod:commands_setup(false),
+                        %% setup
+                        {ok,TestRef} = Mod:setup(false),
 
-                        %% commands - run
+                        %% run
                         {H,S,Res} = run_commands(?MODULE,Cmds,Params),
 
-                        %% commands - history
+                        %% history
                         Fun = fun({Cmd,{State,Reply}},{N,Acc}) -> {N+1,[{N,Cmd,Reply,State}|Acc]} end,
                         {_, RevCmdsH} = lists:foldl(Fun, {1,[]}, zip(tl(Cmds),H)),
                         CmdsH = lists:reverse(RevCmdsH),
@@ -129,11 +129,11 @@ qc_run_commands(Mod, Options)
                                %% state is sane
                                io:format("~nSTATE IS SANE:~n\t~p~n",[state_is_sane(Mod, S)])
                            end,
-                           aggregate(Mod:commands_aggregate(CmdsH),
+                           aggregate(Mod:aggregate(CmdsH),
                                      (ok =:= Res
                                       andalso state_is_sane(Mod, S)
-                                      %% commands - teardown
-                                      andalso ok =:= Mod:commands_teardown(TestRef,S#state.mod_state))))
+                                      %% teardown
+                                      andalso ok =:= Mod:teardown(TestRef,S#state.mod_state))))
                     end);
         true ->
             %% Number of attempts to make each test case fail. When
@@ -147,10 +147,10 @@ qc_run_commands(Mod, Options)
                             ?ALWAYS(_Attempts,
                                     ?TIMEOUT(5000,
                                              begin
-                                                 %% commands - setup
-                                                 {ok,TestRef} = Mod:commands_setup(false),
+                                                 %% setup
+                                                 {ok,TestRef} = Mod:setup(false),
 
-                                                 %% commands - run
+                                                 %% run
                                                  {H,HL,Res} = run_parallel_commands(?MODULE,Cmds,Params),
 
                                                  %% whenfail
@@ -168,11 +168,11 @@ qc_run_commands(Mod, Options)
                                                     end,
                                                     aggregate(command_names(Cmds),
                                                               (ok =:= Res
-                                                               %% commands - teardown
-                                                               andalso ok =:= Mod:commands_teardown(TestRef,undefined))))
+                                                               %% teardown
+                                                               andalso ok =:= Mod:teardown(TestRef,undefined))))
                                              end))))
     end;
-qc_run_commands(_Mod, _Options) ->
+qc_prop(_Mod, _Options) ->
     exit(badarg).
 
 -spec qc_gen_command(module(), modstate()) -> any().

@@ -25,7 +25,7 @@
 -behaviour(qc_statem).
 -export([command_gen/2]).
 -export([initial_state/0, state_is_sane/1, next_state/3, precondition/2, postcondition/3]).
--export([commands_setup/1, commands_teardown/1, commands_teardown/2, commands_aggregate/1]).
+-export([setup/1, teardown/1, teardown/2, aggregate/1]).
 
 %% DEBUG -compile(export_all).
 -export([new/2,
@@ -127,22 +127,22 @@ postcondition(#state{objs=Objs}, {call,_,next,[_Tab,Key]}, Res) ->
 postcondition(_S, {call,_,_,_}, _Res) ->
     false.
 
--spec commands_setup(boolean()) -> {ok, term()}.
-commands_setup(_Hard) ->
+-spec setup(boolean()) -> {ok, term()}.
+setup(_Hard) ->
     catch ets:delete(?TAB),
     {ok, unused}.
 
--spec commands_teardown(term()) -> ok.
-commands_teardown(unused) ->
+-spec teardown(term()) -> ok.
+teardown(unused) ->
     ok.
 
--spec commands_teardown(term(), #state{}) -> ok.
-commands_teardown(Ref, _State) ->
-    commands_teardown(Ref).
+-spec teardown(term(), #state{}) -> ok.
+teardown(Ref, _State) ->
+    teardown(Ref).
 
--spec commands_aggregate([{integer(), term(), term(), #state{}}])
-                        -> [{atom(), atom(), integer() | term()}].
-commands_aggregate(L) ->
+-spec aggregate([{integer(), term(), term(), #state{}}])
+               -> [{atom(), atom(), integer() | term()}].
+aggregate(L) ->
     [ {Cmd,filter_reply(Reply)} || {_N,{set,_,{call,_,Cmd,_}},Reply,_State} <- L ].
 
 filter_reply({'EXIT',{Err,_}}) ->
