@@ -88,53 +88,57 @@ qc_prop(Mod, Options)
 
     %% loop
     Parallel = proplists:get_bool(parallel, Options),
-    Params = [{parallel,Parallel},{mod,Mod},{options,proplists:delete(parallel, Options)}],
+    Sometimes = proplists:get_value(sometimes, Options, 1),
+    Params = [{parallel,Parallel},
+              {mod,Mod},
+              {options,proplists:delete(sometimes, proplists:delete(parallel, Options))}],
     case Parallel of
         false ->
             ?FORALL(Cmds,with_parameters(Params,
                                          ?LET(InitialState,initial_state(Mod),
                                               more_commands(3,commands(?MODULE,InitialState)))),
-                    begin
-                        %% setup
-                        {ok,TestRef} = Mod:setup(false),
+                    ?SOMETIMES(Sometimes,
+                               begin
+                                   %% setup
+                                   {ok,TestRef} = Mod:setup(false),
 
-                        %% run
-                        {H,S,Res} = run_commands(?MODULE,Cmds,Params),
+                                   %% run
+                                   {H,S,Res} = run_commands(?MODULE,Cmds,Params),
 
-                        %% history
-                        Fun = fun({Cmd,{State,Reply}},{N,Acc}) -> {N+1,[{N,Cmd,Reply,State}|Acc]} end,
-                        {_, RevCmdsH} = lists:foldl(Fun, {1,[]}, zip(tl(Cmds),H)),
-                        CmdsH = lists:reverse(RevCmdsH),
+                                   %% history
+                                   Fun = fun({Cmd,{State,Reply}},{N,Acc}) -> {N+1,[{N,Cmd,Reply,State}|Acc]} end,
+                                   {_, RevCmdsH} = lists:foldl(Fun, {1,[]}, zip(tl(Cmds),H)),
+                                   CmdsH = lists:reverse(RevCmdsH),
 
-                        %% whenfail
-                        ?WHENFAIL(
-                           begin
-                               %% commands
-                               FileName = write_commands(Cmds),
-                               io:format("~nCOMMANDS:~n\t~p~n",[FileName]),
-                               %% history
-                               io:format("~nHISTORY:"),
-                               _ = if
-                                       length(CmdsH) < 1 ->
-                                           io:format(" none~n");
-                                       true ->
-                                           [ io:format("~n #~p:~n\tCmd: ~p~n\tReply: ~p~n\tState: ~p~n",
-                                                       [N,Cmd,Reply,State])
-                                             || {N,Cmd,Reply,State} <- CmdsH ]
-                                   end,
-                               %% result
-                               io:format("~nRESULT:~n\t~p~n",[Res]),
-                               %% state
-                               io:format("~nSTATE:~n\t~p~n",[S]),
-                               %% state is sane
-                               io:format("~nSTATE IS SANE:~n\t~p~n",[state_is_sane(Mod, S)])
-                           end,
-                           aggregate(Mod:aggregate(CmdsH),
-                                     (ok =:= Res
-                                      andalso state_is_sane(Mod, S)
-                                      %% teardown
-                                      andalso ok =:= Mod:teardown(TestRef,S#state.mod_state))))
-                    end);
+                                   %% whenfail
+                                   ?WHENFAIL(
+                                      begin
+                                          %% commands
+                                          FileName = write_commands(Cmds),
+                                          io:format("~nCOMMANDS:~n\t~p~n",[FileName]),
+                                          %% history
+                                          io:format("~nHISTORY:"),
+                                          _ = if
+                                                  length(CmdsH) < 1 ->
+                                                      io:format(" none~n");
+                                                  true ->
+                                                      [ io:format("~n #~p:~n\tCmd: ~p~n\tReply: ~p~n\tState: ~p~n",
+                                                                  [N,Cmd,Reply,State])
+                                                        || {N,Cmd,Reply,State} <- CmdsH ]
+                                              end,
+                                          %% result
+                                          io:format("~nRESULT:~n\t~p~n",[Res]),
+                                          %% state
+                                          io:format("~nSTATE:~n\t~p~n",[S]),
+                                          %% state is sane
+                                          io:format("~nSTATE IS SANE:~n\t~p~n",[state_is_sane(Mod, S)])
+                                      end,
+                                      aggregate(Mod:aggregate(CmdsH),
+                                                (ok =:= Res
+                                                 andalso state_is_sane(Mod, S)
+                                                 %% teardown
+                                                 andalso ok =:= Mod:teardown(TestRef,S#state.mod_state))))
+                               end));
         true ->
             %% Number of attempts to make each test case fail. When
             %% searching for a failing example, we run each test

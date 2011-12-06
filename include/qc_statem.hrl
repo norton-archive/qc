@@ -40,7 +40,7 @@ qc_run() ->
 qc_run(NumTests) ->
     qc_run(NumTests, []).
 
--spec qc_run(non_neg_integer(), [parallel | noshrink]) -> boolean().
+-spec qc_run(non_neg_integer(), [parallel | noshrink | {sometimes,pos_integer()}]) -> boolean().
 qc_run(NumTests, Options) ->
     case proplists:get_bool(noshrink, Options) of
         false ->
