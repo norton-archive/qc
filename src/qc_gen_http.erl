@@ -55,4 +55,43 @@
 %% <">            = <US-ASCII double-quote mark (34)>
 %% 
 
+-define(CR, 13).
+-define(LF, 10).
+-define(SP, 32).
+-define(HT, 9).
+-define(WEAK, "W/").
+
+gen_entity_tag() ->
+    ?LET(OptionalWeak, oneof(?WEEK, ""),
+	 ?LET(OT, gen_opaque_tag(),
+	      OptionalWeak++OT))
+
+
+gen_opaque_tag() ->
+    gen_quoted_string().
+
+gen_quoted_string() ->
+    ?LET(S0, list(oneof([gen_qdtext(), gen_quoted_pair()])),
+	 [$"|S0]++"\"").
+
+gen_qdtext() ->
+    ?SUCHTHAT(Chr, gen_text(), Chr =/= $").
+
+gen_quoted_pair() ->
+    ?LET(Chr, gen_char(), [$\\, Chr]).
+
+gen_char() ->
+    choose(0, 127).
+
+gen_text() ->
+    oneof(choose(32,126), gen_lws()).
+
+gen_lws() ->
+    ?LET(OptionalCRLF, oneof([[CR,LF], []]),
+	 ?LET(X, list(oneof([SP,HT])),
+	      OptionalCRLF++X)).
+		      
+    
+
+
 -endif. %% -ifdef(QC).
