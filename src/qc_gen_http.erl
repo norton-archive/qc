@@ -70,7 +70,9 @@ gen_opaque_tag() ->
     gen_quoted_string().
 
 gen_quoted_string() ->
-    ?LET(S0, list(oneof([gen_qdtext(), gen_quoted_pair()])),
+    ?LET(S0,
+	 list(frequency([{100,gen_qdtext()},
+			 {1,gen_quoted_pair()}])),
 	 [$"|S0]++"\"").
 
 gen_qdtext() ->
