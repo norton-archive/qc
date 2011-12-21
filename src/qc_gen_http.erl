@@ -87,8 +87,9 @@ gen_text() ->
 
 gen_lws() ->
     ?LET(OptionalCRLF, oneof([[?CR,?LF], []]),
-	 ?LET(X, list(oneof([?SP,?HT])),
-	      OptionalCRLF++X)).
+	 ?LET(Head, oneof([?SP,?HT]),
+	      ?LET(X, list(oneof([?SP,?HT])),
+		   OptionalCRLF++[Head|X]))).
 		      
     
 
