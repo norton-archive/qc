@@ -62,10 +62,9 @@
 -define(WEAK, "W/").
 
 gen_entity_tag() ->
-    ?LET(OptionalWeak, oneof(?WEEK, ""),
+    ?LET(OptionalWeak, oneof([?WEAK, ""]),
 	 ?LET(OT, gen_opaque_tag(),
-	      OptionalWeak++OT))
-
+	      OptionalWeak++OT)).
 
 gen_opaque_tag() ->
     gen_quoted_string().
@@ -84,11 +83,11 @@ gen_char() ->
     choose(0, 127).
 
 gen_text() ->
-    oneof(choose(32,126), gen_lws()).
+    oneof([choose(32,126), gen_lws()]).
 
 gen_lws() ->
-    ?LET(OptionalCRLF, oneof([[CR,LF], []]),
-	 ?LET(X, list(oneof([SP,HT])),
+    ?LET(OptionalCRLF, oneof([[?CR,?LF], []]),
+	 ?LET(X, list(oneof([?SP,?HT])),
 	      OptionalCRLF++X)).
 		      
     
