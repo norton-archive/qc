@@ -61,18 +61,27 @@
 -define(HT, 9).
 -define(WEAK, "W/").
 
+-define(DEFAULT_QD, 100).
+-define(DEFAULT_QP, 1).
+
 gen_entity_tag() ->
+    gen_entity_tag(?DEFAULT_QD, ?DEFAULT_QP).
+gen_entity_tag(QD,QP) ->
     ?LET(OptionalWeak, oneof([?WEAK, ""]),
-	 ?LET(OT, gen_opaque_tag(),
+	 ?LET(OT, gen_opaque_tag(QD,QP),
 	      OptionalWeak++OT)).
 
 gen_opaque_tag() ->
-    gen_quoted_string().
+    gen_opaque_tag(?DEFAULT_QD, ?DEFAULT_QP).
+gen_opaque_tag(QD,QP) ->
+    gen_quoted_string(QD,QP).
 
 gen_quoted_string() ->
+    gen_quoted_string(?DEFAULT_QD, ?DEFAULT_QP).
+gen_quoted_string(QD,QP) ->
     ?LET(S0,
-	 list(frequency([{100,gen_qdtext()},
-			 {1,gen_quoted_pair()}])),
+	 list(frequency([{QD,gen_qdtext()},
+			 {QP,gen_quoted_pair()}])),
 	 [$"|S0]++"\"").
 
 gen_qdtext() ->
