@@ -61,7 +61,7 @@
 -define(HT, 9).
 -define(WEAK, "W/").
 
--define(DEFAULT_QD, 100).
+-define(DEFAULT_QD, 1).
 -define(DEFAULT_QP, 1).
 
 gen_entity_tag() ->
