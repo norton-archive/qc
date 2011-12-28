@@ -75,7 +75,7 @@ qc_counterexample(Options, CounterExample) ->
 
 %% counterexample read
 qc_counterexample_read(FileName) ->
-    {ok, CounterExample} = file:consult(FileName),
+    {ok, [CounterExample]} = file:consult(FileName),
     qc_counterexample([], CounterExample).
 
 %% counterexample write
