@@ -9,10 +9,6 @@
 
 
 
-
-__This module defines the `qc_statem` behaviour.__
-<br></br>
- Required callback functions: `command_gen/2`, `initial_state/0`, `state_is_sane/1`, `next_state/3`, `precondition/2`, `postcondition/3`, `commands_setup/1`, `commands_teardown/1`, `commands_teardown/2`.
 <a name="types"></a>
 
 ##Data Types##
@@ -38,7 +34,7 @@ __abstract datatype__: `modstate()`
 ##Function Index##
 
 
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#behaviour_info-1">behaviour_info/1</a></td><td></td></tr><tr><td valign="top"><a href="#command-1">command/1</a></td><td></td></tr><tr><td valign="top"><a href="#initial_state-0">initial_state/0</a></td><td></td></tr><tr><td valign="top"><a href="#initial_state-1">initial_state/1</a></td><td></td></tr><tr><td valign="top"><a href="#next_state-3">next_state/3</a></td><td></td></tr><tr><td valign="top"><a href="#postcondition-3">postcondition/3</a></td><td></td></tr><tr><td valign="top"><a href="#precondition-2">precondition/2</a></td><td></td></tr><tr><td valign="top"><a href="#qc_gen_command-2">qc_gen_command/2</a></td><td></td></tr><tr><td valign="top"><a href="#qc_run_commands-1">qc_run_commands/1</a></td><td></td></tr><tr><td valign="top"><a href="#qc_run_commands-2">qc_run_commands/2</a></td><td></td></tr><tr><td valign="top"><a href="#qc_sample_commands-1">qc_sample_commands/1</a></td><td></td></tr><tr><td valign="top"><a href="#qc_sample_commands-2">qc_sample_commands/2</a></td><td></td></tr></table>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#behaviour_info-1">behaviour_info/1</a></td><td></td></tr><tr><td valign="top"><a href="#command-1">command/1</a></td><td></td></tr><tr><td valign="top"><a href="#initial_state-0">initial_state/0</a></td><td></td></tr><tr><td valign="top"><a href="#initial_state-1">initial_state/1</a></td><td></td></tr><tr><td valign="top"><a href="#next_state-3">next_state/3</a></td><td></td></tr><tr><td valign="top"><a href="#postcondition-3">postcondition/3</a></td><td></td></tr><tr><td valign="top"><a href="#precondition-2">precondition/2</a></td><td></td></tr><tr><td valign="top"><a href="#qc_gen_command-2">qc_gen_command/2</a></td><td></td></tr><tr><td valign="top"><a href="#qc_prop-1">qc_prop/1</a></td><td></td></tr><tr><td valign="top"><a href="#qc_prop-2">qc_prop/2</a></td><td></td></tr><tr><td valign="top"><a href="#qc_sample-1">qc_sample/1</a></td><td></td></tr><tr><td valign="top"><a href="#qc_sample-2">qc_sample/2</a></td><td></td></tr></table>
 
 
 <a name="functions"></a>
@@ -115,51 +111,51 @@ __abstract datatype__: `modstate()`
 
 
 
-<pre>qc_gen_command(Mod::module(), ModState::[modstate()](#type-modstate)) -&gt; any()</pre>
+<pre>qc_gen_command(Mod::module(), ModState::<a href="#type-modstate">modstate()</a>) -> any()</pre>
 <br></br>
 
 
-<a name="qc_run_commands-1"></a>
+<a name="qc_prop-1"></a>
 
-###qc_run_commands/1##
-
-
+###qc_prop/1##
 
 
-<pre>qc_run_commands(Mod::module()) -&gt; any()</pre>
+
+
+<pre>qc_prop(Mod::module()) -&gt; any()</pre>
 <br></br>
 
 
-<a name="qc_run_commands-2"></a>
+<a name="qc_prop-2"></a>
 
-###qc_run_commands/2##
-
-
+###qc_prop/2##
 
 
-<pre>qc_run_commands(Mod::module(), Options::[proplist()](#type-proplist)) -&gt; any()</pre>
+
+
+<pre>qc_prop(Mod::module(), Options::<a href="#type-proplist">proplist()</a>) -> any()</pre>
 <br></br>
 
 
-<a name="qc_sample_commands-1"></a>
+<a name="qc_sample-1"></a>
 
-###qc_sample_commands/1##
-
-
+###qc_sample/1##
 
 
-<pre>qc_sample_commands(Mod::module()) -&gt; any()</pre>
+
+
+<pre>qc_sample(Mod::module()) -&gt; any()</pre>
 <br></br>
 
 
-<a name="qc_sample_commands-2"></a>
+<a name="qc_sample-2"></a>
 
-###qc_sample_commands/2##
-
-
+###qc_sample/2##
 
 
-<pre>qc_sample_commands(Mod::module(), Options::[proplist()](#type-proplist)) -&gt; any()</pre>
+
+
+<pre>qc_sample(Mod::module(), Options::<a href="#type-proplist">proplist()</a>) -> any()</pre>
 <br></br>
 
 
