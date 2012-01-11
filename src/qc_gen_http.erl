@@ -98,11 +98,68 @@ gen_text() ->
 
 gen_lws() ->
     ?LET(OptionalCRLF, oneof([[?CR,?LF], []]),
-	 ?LET(Head, oneof([?SP,?HT]),
-	      ?LET(X, list(oneof([?SP,?HT])),
-		   OptionalCRLF++[Head|X]))).
+	 ?LET(SPHT, at_least(1, oneof([?SP,?HT])),
+	      OptionalCRLF++SPHT)).
 		      
+%% --- rfc2616.txt --- 14.35 Range ---
+%% bytes-unit       = "bytes"
+%% DIGIT          = <any US-ASCII digit "0".."9">
+%%
+%% ranges-specifier = byte-ranges-specifier
+%% byte-ranges-specifier = bytes-unit "=" byte-range-set
+%% byte-range-set  = 1#( byte-range-spec | suffix-byte-range-spec )
+%% byte-range-spec = first-byte-pos "-" [last-byte-pos]
+%% first-byte-pos  = 1*DIGIT
+%% last-byte-pos   = 1*DIGIT
     
+%% suffix-byte-range-spec = "-" suffix-length
+%% suffix-length = 1*DIGIT
+
+gen_byte_unit() ->
+    "bytes".
+gen_digit() ->
+    oneof([$0, $1, $2, $3, $4, $5, $6, $7, $8, $9]).
+
+gen_ranges_specifier() ->
+    gen_byte_ranges_specifier().
+
+gen_byte_ranges_specifier() ->
+    ?LET(BU, gen_byte_unit(),
+	 ?LET(BRS, gen_byte_range_set(),
+	      BU++[$=|BRS])).
+
+gen_byte_range_set() ->
+    at_least_csl(1, oneof([gen_byte_range_spec(),
+			   gen_suffix_byte_range_spec()])).
+
+gen_byte_range_spec() ->
+    ?LET(FBP, gen_first_byte_pos(),
+	 ?LET(LBP, oneof([gen_last_byte_pos(), ""]),
+	      FBP++[$-|LBP])).
+
+gen_first_byte_pos() ->
+    at_least(1, gen_digit()).
+
+gen_last_byte_pos() ->
+    at_least(1, gen_digit()).
+
+gen_suffix_byte_range_spec() ->
+    ?LET(SL, gen_suffix_length(),
+	 [$-|SL]).
+
+gen_suffix_length() ->
+    at_least(1, gen_digit()).
+
+%% --- utils ---
+at_least(1, Gen) -> %% todo: N elements at least
+    ?LET(Head, Gen,
+	 ?LET(Tail, list(Gen),
+	      [Head|Tail])).
+
+at_least_csl(N, Gen) ->
+    %% for comma seprated list --- "<n>#<m>element"
+    ?LET(List, at_least(N, Gen),
+	 string:join(List, ", ")). %% todo: *LWS
 
 
 -endif. %% -ifdef(QC).
