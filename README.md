@@ -10,9 +10,7 @@ QuickCheck and Proper testing tools.</p>
 <p><em>This repository is a "work-in-progress" - please contribute if you
 find QC useful.</em></p>
 
-
-##Quick Start Recipe##
-
+<h2 id="_quick_start_recipe">Quick Start Recipe</h2>
 
 <p>To download and build the qc application in one shot, please follow
 this recipe:</p>
@@ -30,13 +28,15 @@ $ ./rebar skip_deps=true doc</tt></pre>
 
 
 
-##Documentation##
+<h2 id="_documentation">Documentation</h2>
 
 
 <h3 id="_where_should_i_start">Where should I start?</h3>
 <p>This README is the only bit of documentation right now.</p>
 <p>Please see <a href="https://github.com/norton/lets">https://github.com/norton/lets</a> for an Erlang application
 that has been developed and tested by using <strong>only</strong> QC.</p>
+
+
 <h3 id="_what_is_quickcheck">What is QuickCheck?</h3>
 <p>QuickCheck is a commercial property-based testing tool for Erlang.</p>
 <ul>
@@ -53,6 +53,8 @@ A <em>tool</em> for testing properties in randomly generated cases.
 </li>
 </ul>
 <p>See <a href="http://www.quviq.com/">http://www.quviq.com/</a> for further details.</p>
+
+
 <h3 id="_what_is_proper">What is Proper?</h3>
 <p>PropEr (PROPerty-based testing tool for ERlang) is a
 QuickCheck-inspired open-source property-based testing tool for
@@ -61,8 +63,8 @@ Erlang.</p>
 
 
 
-##Roadmap##
 
+<h2 id="_roadmap">Roadmap</h2>
 
 <ul>
 <li>
@@ -85,12 +87,14 @@ PropEr resize issue (<a href="https://github.com/manopapad/proper/issues/10">htt
 
 
 
+
 ##Modules##
 
 
 <table width="100%" border="0" summary="list of modules">
 <tr><td><a href="https://github.com/norton/qc/blob/master/doc/qc.md" class="module">qc</a></td></tr>
 <tr><td><a href="https://github.com/norton/qc/blob/master/doc/qc_gen.md" class="module">qc_gen</a></td></tr>
+<tr><td><a href="https://github.com/norton/qc/blob/master/doc/qc_gen_http.md" class="module">qc_gen_http</a></td></tr>
 <tr><td><a href="https://github.com/norton/qc/blob/master/doc/qc_slave.md" class="module">qc_slave</a></td></tr>
 <tr><td><a href="https://github.com/norton/qc/blob/master/doc/qc_statem.md" class="module">qc_statem</a></td></tr></table>
 
