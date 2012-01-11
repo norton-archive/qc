@@ -120,17 +120,36 @@ gen_byte_unit() ->
 gen_digit() ->
     oneof([$0, $1, $2, $3, $4, $5, $6, $7, $8, $9]).
 
+gen_ranges_specifier(Size) ->
+    gen_byte_ranges_specifier(Size).
+
 gen_ranges_specifier() ->
     gen_byte_ranges_specifier().
+
+gen_byte_ranges_specifier(Size) ->
+    ?LET(BU, gen_byte_unit(),
+	 ?LET(BRS, gen_byte_range_set(Size),
+	      BU++[$=|BRS])).
 
 gen_byte_ranges_specifier() ->
     ?LET(BU, gen_byte_unit(),
 	 ?LET(BRS, gen_byte_range_set(),
 	      BU++[$=|BRS])).
 
+gen_byte_range_set(Size) ->
+    %% todo: multiple range
+    oneof([gen_byte_range_spec(Size),
+	   gen_suffix_byte_range_spec(Size)]).
+
 gen_byte_range_set() ->
     at_least_csl(1, oneof([gen_byte_range_spec(),
 			   gen_suffix_byte_range_spec()])).
+
+gen_byte_range_spec(Size) ->
+    ?LET(FBP, choose(0, Size - 2),
+	 ?LET(LBP, choose(FBP + 1, Size - 1),
+	      integer_to_list(FBP)++
+		  [$-|integer_to_list(LBP)])).
 
 gen_byte_range_spec() ->
     ?LET(FBP, gen_first_byte_pos(),
@@ -142,6 +161,10 @@ gen_first_byte_pos() ->
 
 gen_last_byte_pos() ->
     at_least(1, gen_digit()).
+
+gen_suffix_byte_range_spec(Size) ->
+    ?LET(SL, choose(1, Size),
+	 [$-|integer_to_list(SL)]).
 
 gen_suffix_byte_range_spec() ->
     ?LET(SL, gen_suffix_length(),
