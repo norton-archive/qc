@@ -146,6 +146,7 @@ gen_byte_range_set() ->
 			   gen_suffix_byte_range_spec()])).
 
 gen_byte_range_spec(Size) ->
+    %% todo: LBP is optional
     ?LET(FBP, choose(0, Size - 2),
 	 ?LET(LBP, choose(FBP + 1, Size - 1),
 	      integer_to_list(FBP)++
