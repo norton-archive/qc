@@ -120,6 +120,8 @@ gen_byte_unit() ->
 gen_digit() ->
     oneof([$0, $1, $2, $3, $4, $5, $6, $7, $8, $9]).
 
+gen_ranges_specifier(0) ->
+    undefined;
 gen_ranges_specifier(Size) ->
     gen_byte_ranges_specifier(Size).
 
@@ -147,8 +149,8 @@ gen_byte_range_set() ->
 
 gen_byte_range_spec(Size) ->
     %% todo: LBP is optional
-    ?LET(FBP, choose(0, Size - 2),
-	 ?LET(LBP, choose(FBP + 1, Size - 1),
+    ?LET(FBP, choose(0, Size - 1),
+	 ?LET(LBP, choose(FBP, Size - 1),
 	      integer_to_list(FBP)++
 		  [$-|integer_to_list(LBP)])).
 
