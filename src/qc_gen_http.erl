@@ -148,11 +148,10 @@ gen_byte_range_set() ->
 			   gen_suffix_byte_range_spec()])).
 
 gen_byte_range_spec(Size) ->
-    %% todo: LBP is optional
     ?LET(FBP, choose(0, Size - 1),
 	 ?LET(LBP, choose(FBP, Size - 1),
-	      integer_to_list(FBP)++
-		  [$-|integer_to_list(LBP)])).
+	      ?LET(LBP2, oneof(["", integer_to_list(LBP)]),
+		   integer_to_list(FBP) ++ [$-|LBP2]))).
 
 gen_byte_range_spec() ->
     ?LET(FBP, gen_first_byte_pos(),
