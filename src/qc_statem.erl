@@ -230,7 +230,7 @@ write_commands(Cmds) ->
     write_commands(Cmds,FileName).
 
 write_commands(Cmds,FileName) ->
-    ok = file:write_file(FileName, io_lib:format("~p.", [Cmds])),
+    ok = file:write_file(FileName, io_lib:format("[~p].", [Cmds])),
     FileName.
 
 -endif. %% -ifdef(QC).
