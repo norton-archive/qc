@@ -3,7 +3,7 @@
 #QC - Wrappers for QuickCheck and Proper testing tools#
 
 
-Copyright (c) 2011 by Gemini Mobile Technologies, Inc.
+Copyright (c) 2012 by Gemini Mobile Technologies, Inc.
 
 __Authors:__ Joseph Wayne Norton ([`norton@alum.mit.edu`](mailto:norton@alum.mit.edu)).<p>QC is an Erlang application that provides a set of wrappers for
 QuickCheck and Proper testing tools.</p>

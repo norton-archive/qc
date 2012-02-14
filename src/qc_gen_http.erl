@@ -1,5 +1,5 @@
 %%%-------------------------------------------------------
-%%% Copyright (c) 2008-2011 Gemini Mobile Technologies, Inc.
+%%% Copyright (c) 2008-2012 Gemini Mobile Technologies, Inc.
 %%% All rights reserved.
 %%%
 %%% Licensed under the Apache License, Version 2.0
@@ -31,29 +31,29 @@
 
 
 %% ---rfc2616.txt-------
-%% 
+%%
 %% entity-tag = [ weak ] opaque-tag
 %% weak       = "W/"
 %% opaque-tag = quoted-string
-%% 
+%%
 %% quoted-string  = ( <"> *(qdtext | quoted-pair ) <"> )
 %% qdtext         = <any TEXT except <">>
 %% quoted-pair    = "\" CHAR
-%% 
+%%
 %% CHAR           = <any US-ASCII character (octets 0 - 127)>
-%% 
+%%
 %% TEXT           = <any OCTET except CTLs, but including LWS>
 %% LWS            = [CRLF] 1*( SP | HT )
-%% 
+%%
 %% CTL            = <any US-ASCII control character
 %%                  (octets 0 - 31) and DEL (127)>
-%% 
+%%
 %% CR             = <US-ASCII CR, carriage return (13)>
 %% LF             = <US-ASCII LF, linefeed (10)>
 %% SP             = <US-ASCII SP, space (32)>
 %% HT             = <US-ASCII HT, horizontal-tab (9)>
 %% <">            = <US-ASCII double-quote mark (34)>
-%% 
+%%
 
 -define(CR, 13).
 -define(LF, 10).
@@ -68,8 +68,8 @@ gen_entity_tag() ->
     gen_entity_tag(?DEFAULT_QD, ?DEFAULT_QP).
 gen_entity_tag(QD,QP) ->
     ?LET(OptionalWeak, oneof([?WEAK, ""]),
-	 ?LET(OT, gen_opaque_tag(QD,QP),
-	      OptionalWeak++OT)).
+         ?LET(OT, gen_opaque_tag(QD,QP),
+              OptionalWeak++OT)).
 
 gen_opaque_tag() ->
     gen_opaque_tag(?DEFAULT_QD, ?DEFAULT_QP).
@@ -80,9 +80,9 @@ gen_quoted_string() ->
     gen_quoted_string(?DEFAULT_QD, ?DEFAULT_QP).
 gen_quoted_string(QD,QP) ->
     ?LET(S0,
-	 list(frequency([{QD,gen_qdtext()},
-			 {QP,gen_quoted_pair()}])),
-	 [$"|S0]++"\"").
+         list(frequency([{QD,gen_qdtext()},
+                         {QP,gen_quoted_pair()}])),
+         [$"|S0]++"\"").
 
 gen_qdtext() ->
     ?SUCHTHAT(Chr, gen_text(), Chr =/= $").
@@ -98,9 +98,9 @@ gen_text() ->
 
 gen_lws() ->
     ?LET(OptionalCRLF, oneof([[?CR,?LF], []]),
-	 ?LET(SPHT, at_least(1, oneof([?SP,?HT])),
-	      OptionalCRLF++SPHT)).
-		      
+         ?LET(SPHT, at_least(1, oneof([?SP,?HT])),
+              OptionalCRLF++SPHT)).
+
 %% --- rfc2616.txt --- 14.35 Range ---
 %% bytes-unit       = "bytes"
 %% DIGIT          = <any US-ASCII digit "0".."9">
@@ -111,7 +111,7 @@ gen_lws() ->
 %% byte-range-spec = first-byte-pos "-" [last-byte-pos]
 %% first-byte-pos  = 1*DIGIT
 %% last-byte-pos   = 1*DIGIT
-    
+
 %% suffix-byte-range-spec = "-" suffix-length
 %% suffix-length = 1*DIGIT
 
@@ -130,33 +130,33 @@ gen_ranges_specifier() ->
 
 gen_byte_ranges_specifier(Size) ->
     ?LET(BU, gen_byte_unit(),
-	 ?LET(BRS, gen_byte_range_set(Size),
-	      BU++[$=|BRS])).
+         ?LET(BRS, gen_byte_range_set(Size),
+              BU++[$=|BRS])).
 
 gen_byte_ranges_specifier() ->
     ?LET(BU, gen_byte_unit(),
-	 ?LET(BRS, gen_byte_range_set(),
-	      BU++[$=|BRS])).
+         ?LET(BRS, gen_byte_range_set(),
+              BU++[$=|BRS])).
 
 gen_byte_range_set(Size) ->
     %% todo: multiple range
     oneof([gen_byte_range_spec(Size),
-	   gen_suffix_byte_range_spec(Size)]).
+           gen_suffix_byte_range_spec(Size)]).
 
 gen_byte_range_set() ->
     at_least_csl(1, oneof([gen_byte_range_spec(),
-			   gen_suffix_byte_range_spec()])).
+                           gen_suffix_byte_range_spec()])).
 
 gen_byte_range_spec(Size) ->
     ?LET(FBP, choose(0, Size - 1),
-	 ?LET(LBP, choose(FBP, Size - 1),
-	      ?LET(LBP2, oneof(["", integer_to_list(LBP)]),
-		   integer_to_list(FBP) ++ [$-|LBP2]))).
+         ?LET(LBP, choose(FBP, Size - 1),
+              ?LET(LBP2, oneof(["", integer_to_list(LBP)]),
+                   integer_to_list(FBP) ++ [$-|LBP2]))).
 
 gen_byte_range_spec() ->
     ?LET(FBP, gen_first_byte_pos(),
-	 ?LET(LBP, oneof([gen_last_byte_pos(), ""]),
-	      FBP++[$-|LBP])).
+         ?LET(LBP, oneof([gen_last_byte_pos(), ""]),
+              FBP++[$-|LBP])).
 
 gen_first_byte_pos() ->
     at_least(1, gen_digit()).
@@ -166,11 +166,11 @@ gen_last_byte_pos() ->
 
 gen_suffix_byte_range_spec(Size) ->
     ?LET(SL, choose(1, Size),
-	 [$-|integer_to_list(SL)]).
+         [$-|integer_to_list(SL)]).
 
 gen_suffix_byte_range_spec() ->
     ?LET(SL, gen_suffix_length(),
-	 [$-|SL]).
+         [$-|SL]).
 
 gen_suffix_length() ->
     at_least(1, gen_digit()).
@@ -178,13 +178,13 @@ gen_suffix_length() ->
 %% --- utils ---
 at_least(1, Gen) -> %% todo: N elements at least
     ?LET(Head, Gen,
-	 ?LET(Tail, list(Gen),
-	      [Head|Tail])).
+         ?LET(Tail, list(Gen),
+              [Head|Tail])).
 
 at_least_csl(N, Gen) ->
     %% for comma seprated list --- "<n>#<m>element"
     ?LET(List, at_least(N, Gen),
-	 string:join(List, ", ")). %% todo: *LWS
+         string:join(List, ", ")). %% todo: *LWS
 
 
 -endif. %% -ifdef(QC).
