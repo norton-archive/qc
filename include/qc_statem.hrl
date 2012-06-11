@@ -40,13 +40,21 @@ qc_run() ->
 qc_run(NumTests) ->
     qc_run(NumTests, []).
 
--spec qc_run(non_neg_integer(), [parallel | noshrink | {sometimes,pos_integer()} | any()]) -> boolean().
+-spec qc_run(non_neg_integer(), [cover | parallel | noshrink | {sometimes,pos_integer()} | any()]) -> boolean().
 qc_run(NumTests, Options) ->
-    case proplists:get_bool(noshrink, Options) of
-        false ->
-            ?QC:quickcheck(numtests(NumTests,qc_prop(Options)));
-        true ->
-            ?QC:quickcheck(numtests(NumTests,noshrink(qc_prop(lists:delete(noshrink, Options)))))
+    Cover = proplists:get_bool(cover, Options),
+    _ = if Cover -> qc_cover_setup(?MODULE); true -> ok end,
+    try
+        Options1 = proplists:delete(cover, Options),
+        case proplists:get_bool(noshrink, Options1) of
+            false ->
+                ?QC:quickcheck(numtests(NumTests,qc_prop(Options1)));
+            true ->
+                Options2 = proplists:delete(noshrink, Options1),
+                ?QC:quickcheck(numtests(NumTests,noshrink(qc_prop(Options2))))
+        end
+    after
+        _ = if Cover -> qc_cover_teardown(?MODULE); true -> ok end
     end.
 
 %% sample
@@ -84,6 +92,25 @@ qc_counterexample_write(FileName) ->
 
 qc_counterexample_write(FileName, CounterExample) ->
     file:write_file(FileName, io_lib:format("~p.", [CounterExample])).
+
+
+%%%----------------------------------------------------------------------
+%%% Internal
+%%%----------------------------------------------------------------------
+qc_cover_setup(Module) ->
+    _ = cover:reset(Module),
+    {ok, _} = cover:compile_beam(Module),
+    ok.
+
+qc_cover_teardown(Module) ->
+    {{Year,Month,Day},{Hour,Minute,Second}} = calendar:local_time(),
+    FileName = lists:flatten(io_lib:format("~s-~4..0B~2..0B~2..0B-~2..0B~2..0B~2..0B-cover",
+                                           [Module,Year,Month,Day,Hour,Minute,Second])),
+    io:format("~nCOVER:~n\t~p.{txt,html}~n",[FileName]),
+    {ok, _} = cover:analyse_to_file(Module, FileName ++ ".txt", []),
+    {ok, _} = cover:analyse_to_file(Module, FileName ++ ".html", [html]),
+    _ = cover:reset(Module),
+    ok.
 
 -endif. %% -ifdef(qc_statem).
 
