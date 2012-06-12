@@ -87,11 +87,11 @@ qc_prop(Mod, Options)
     ok = Mod:teardown(TestRefOnce),
 
     %% loop
+    Name = proplists:get_value(name, Options, Mod),
     Parallel = proplists:get_bool(parallel, Options),
     Sometimes = proplists:get_value(sometimes, Options, 1),
-    Params = [{parallel,Parallel},
-              {mod,Mod},
-              {options,proplists:delete(sometimes, proplists:delete(parallel, Options))}],
+    NewOptions = proplists:delete(sometimes, proplists:delete(parallel, proplists:delete(name, Options))),
+    Params = [{parallel,Parallel}, {mod,Mod}, {options,NewOptions}],
     case Parallel of
         false ->
             ?FORALL(Cmds,with_parameters(Params,
@@ -114,7 +114,7 @@ qc_prop(Mod, Options)
                                    ?WHENFAIL(
                                       begin
                                           %% commands
-                                          FileName = write_commands(Mod,Cmds),
+                                          FileName = write_commands(Name,Cmds),
                                           io:format("~nCOMMANDS:~n\t~p~n",[FileName]),
                                           %% history
                                           io:format("~nHISTORY:"),
@@ -161,7 +161,7 @@ qc_prop(Mod, Options)
                                                  ?WHENFAIL(
                                                     begin
                                                         %% commands
-                                                        FileName = write_commands(Mod,Cmds),
+                                                        FileName = write_commands(Name,Cmds),
                                                         io:format("~nCOMMANDS:~n\t~p~n",[FileName]),
                                                         %% history
                                                         io:format("~nHISTORY:~n\t~p~n",[H]),
@@ -222,13 +222,12 @@ postcondition(S,C,R) ->
 %%% Internal
 %%%----------------------------------------------------------------------
 
-write_commands(Module,Cmds) ->
-    {{Year,Month,Day},{Hour,Minute,Second}} = calendar:local_time(),
-    FileName = lists:flatten(io_lib:format("~s-~4..0B~2..0B~2..0B-~2..0B~2..0B~2..0B.erl",
-                                           [Module,Year,Month,Day,Hour,Minute,Second])),
-    write_commands(Module,Cmds,FileName).
+write_commands(Name,Cmds) ->
+    {Mega, Sec, Micro} = now(),
+    FileName = lists:flatten(io_lib:format("~s-counterexample-~B-~B-~B.erl", [Name, Mega, Sec, Micro])),
+    write_commands(Name,Cmds,FileName).
 
-write_commands(_Module,Cmds,FileName) ->
+write_commands(_Name,Cmds,FileName) ->
     ok = file:write_file(FileName, io_lib:format("[~p].", [Cmds])),
     FileName.
 

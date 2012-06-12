@@ -40,21 +40,23 @@ qc_run() ->
 qc_run(NumTests) ->
     qc_run(NumTests, []).
 
--spec qc_run(non_neg_integer(), [cover | parallel | noshrink | {sometimes,pos_integer()} | any()]) -> boolean().
+-spec qc_run(non_neg_integer(), [{name,string()} | cover | parallel | noshrink | {sometimes,pos_integer()} | any()]) -> boolean().
 qc_run(NumTests, Options) ->
+    Name = proplists:get_value(name, Options, name(?MODULE)),
     Cover = proplists:get_bool(cover, Options),
-    _ = if Cover -> qc_cover_setup(?MODULE); true -> ok end,
+    _ = if Cover -> cover_setup(?MODULE); true -> ok end,
     try
-        Options1 = proplists:delete(cover, Options),
-        case proplists:get_bool(noshrink, Options1) of
+        Options1 = [{name,Name}|proplists:delete(name, Options)],
+        Options2 = proplists:delete(cover, Options1),
+        case proplists:get_bool(noshrink, Options2) of
             false ->
-                ?QC:quickcheck(numtests(NumTests,qc_prop(Options1)));
+                ?QC:quickcheck(numtests(NumTests, qc_prop(Options2)));
             true ->
-                Options2 = proplists:delete(noshrink, Options1),
-                ?QC:quickcheck(numtests(NumTests,noshrink(qc_prop(Options2))))
+                Options3 = proplists:delete(noshrink, Options2),
+                ?QC:quickcheck(numtests(NumTests, noshrink(qc_prop(Options3))))
         end
     after
-        _ = if Cover -> qc_cover_teardown(?MODULE); true -> ok end
+        _ = if Cover -> cover_teardown(?MODULE, Name); true -> ok end
     end.
 
 %% sample
@@ -97,15 +99,18 @@ qc_counterexample_write(FileName, CounterExample) ->
 %%%----------------------------------------------------------------------
 %%% Internal
 %%%----------------------------------------------------------------------
-qc_cover_setup(Module) ->
+name(Module) ->
+    {{Year,Month,Day},{Hour,Minute,Second}} = calendar:local_time(),
+    lists:flatten(io_lib:format("~s-~4..0B~2..0B~2..0B-~2..0B~2..0B~2..0B",
+                                [Module,Year,Month,Day,Hour,Minute,Second])).
+
+cover_setup(Module) ->
     _ = cover:reset(Module),
     {ok, _} = cover:compile_beam(Module),
     ok.
 
-qc_cover_teardown(Module) ->
-    {{Year,Month,Day},{Hour,Minute,Second}} = calendar:local_time(),
-    FileName = lists:flatten(io_lib:format("~s-~4..0B~2..0B~2..0B-~2..0B~2..0B~2..0B-cover",
-                                           [Module,Year,Month,Day,Hour,Minute,Second])),
+cover_teardown(Module, Name) ->
+    FileName = Name ++ "-cover",
     io:format("~nCOVER:~n\t~p.{txt,html}~n",[FileName]),
     {ok, _} = cover:analyse_to_file(Module, FileName ++ ".txt", []),
     {ok, _} = cover:analyse_to_file(Module, FileName ++ ".html", [html]),
