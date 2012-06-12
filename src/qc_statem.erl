@@ -114,7 +114,7 @@ qc_prop(Mod, Options)
                                    ?WHENFAIL(
                                       begin
                                           %% commands
-                                          FileName = write_commands(Cmds),
+                                          FileName = write_commands(Mod,Cmds),
                                           io:format("~nCOMMANDS:~n\t~p~n",[FileName]),
                                           %% history
                                           io:format("~nHISTORY:"),
@@ -161,7 +161,7 @@ qc_prop(Mod, Options)
                                                  ?WHENFAIL(
                                                     begin
                                                         %% commands
-                                                        FileName = write_commands(Cmds),
+                                                        FileName = write_commands(Mod,Cmds),
                                                         io:format("~nCOMMANDS:~n\t~p~n",[FileName]),
                                                         %% history
                                                         io:format("~nHISTORY:~n\t~p~n",[H]),
@@ -222,14 +222,13 @@ postcondition(S,C,R) ->
 %%% Internal
 %%%----------------------------------------------------------------------
 
-write_commands(Cmds) ->
-    Module = ?MODULE,
+write_commands(Module,Cmds) ->
     {{Year,Month,Day},{Hour,Minute,Second}} = calendar:local_time(),
     FileName = lists:flatten(io_lib:format("~s-~4..0B~2..0B~2..0B-~2..0B~2..0B~2..0B.erl",
                                            [Module,Year,Month,Day,Hour,Minute,Second])),
-    write_commands(Cmds,FileName).
+    write_commands(Module,Cmds,FileName).
 
-write_commands(Cmds,FileName) ->
+write_commands(_Module,Cmds,FileName) ->
     ok = file:write_file(FileName, io_lib:format("[~p].", [Cmds])),
     FileName.
 
