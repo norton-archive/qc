@@ -40,11 +40,11 @@ qc_run() ->
 qc_run(NumTests) ->
     qc_run(NumTests, []).
 
--spec qc_run(non_neg_integer(), [{name,string()} | cover | parallel | noshrink | {sometimes,pos_integer()} | any()]) -> boolean().
+-spec qc_run(non_neg_integer(), [{name,string()} | cover | {cover,[module()]} | parallel | noshrink | {sometimes,pos_integer()} | any()]) -> boolean().
 qc_run(NumTests, Options) ->
     Name = proplists:get_value(name, Options, name(?MODULE)),
-    Cover = proplists:get_bool(cover, Options),
-    _ = if Cover -> cover_setup(?MODULE); true -> ok end,
+    Cover = proplists:get_value(cover, Options, false),
+    _ = if is_list(Cover) orelse Cover -> cover_setup(Cover); true -> ok end,
     try
         Options1 = [{name,Name}|proplists:delete(name, Options)],
         Options2 = proplists:delete(cover, Options1),
@@ -56,7 +56,7 @@ qc_run(NumTests, Options) ->
                 ?QC:quickcheck(numtests(NumTests, noshrink(qc_prop(Options3))))
         end
     after
-        _ = if Cover -> cover_teardown(?MODULE, Name); true -> ok end
+        _ = if is_list(Cover) orelse Cover -> cover_teardown(Cover, Name); true -> ok end
     end.
 
 %% sample
@@ -99,23 +99,30 @@ qc_counterexample_write(FileName, CounterExample) ->
 %%%----------------------------------------------------------------------
 %%% Internal
 %%%----------------------------------------------------------------------
-name(Module) ->
+name(Mod) ->
     {{Year,Month,Day},{Hour,Minute,Second}} = calendar:local_time(),
     lists:flatten(io_lib:format("~s-~4..0B~2..0B~2..0B-~2..0B~2..0B~2..0B",
-                                [Module,Year,Month,Day,Hour,Minute,Second])).
+                                [Mod,Year,Month,Day,Hour,Minute,Second])).
 
-cover_setup(Module) ->
-    _ = cover:reset(Module),
-    {ok, _} = cover:compile_beam(Module),
+cover_setup(true) ->
+    cover_setup([?MODULE]);
+cover_setup(Mods) when is_list(Mods) ->
+    [ begin
+          _ = cover:reset(Mod),
+          {ok, _} = cover:compile_beam(Mod)
+      end || Mod <- Mods ],
     ok.
 
-cover_teardown(Module, Name) ->
-    FileName = Name ++ "-cover",
-    io:format("~nCOVER:~n\t~p.{txt,html}~n",[FileName]),
-    {ok, _} = cover:analyse_to_file(Module, FileName ++ ".txt", []),
-    {ok, _} = cover:analyse_to_file(Module, FileName ++ ".html", [html]),
-    _ = cover:reset(Module),
+cover_teardown(true, Name) ->
+    cover_teardown([?MODULE], Name);
+cover_teardown(Mods, Name) when is_list(Mods) ->
+    [ begin
+          FileName = Name ++ "-cover-" ++ atom_to_list(Mod),
+          io:format("~nCOVER:~n\t~p.{txt,html}~n",[FileName]),
+          {ok, _} = cover:analyse_to_file(Mod, FileName ++ ".txt", []),
+          {ok, _} = cover:analyse_to_file(Mod, FileName ++ ".html", [html]),
+          _ = cover:reset(Mod)
+      end || Mod <- Mods ],
     ok.
 
 -endif. %% -ifdef(qc_statem).
-
