@@ -83,6 +83,7 @@ qc_prop(Mod) ->
 qc_prop(Mod, Options)
   when is_atom(Mod), is_list(Options) ->
     %% setup and teardown
+    Start = erlang:now(),
     {ok,TestRefOnce} = Mod:setup(true),
     ok = Mod:teardown(TestRefOnce),
 
@@ -110,32 +111,57 @@ qc_prop(Mod, Options)
                                    {_, RevCmdsH} = lists:foldl(Fun, {1,[]}, zip(tl(Cmds),H)),
                                    CmdsH = lists:reverse(RevCmdsH),
 
+                                   %% sane
+                                   Sane = state_is_sane(Mod, S),
+
                                    %% whenfail
                                    ?WHENFAIL(
                                       begin
-                                          %% commands
-                                          FileName = write_commands(Name,Cmds),
-                                          io:format("~nCOMMANDS:~n\t~p~n",[FileName]),
-                                          %% history
-                                          io:format("~nHISTORY:"),
-                                          _ = if
-                                                  length(CmdsH) < 1 ->
-                                                      io:format(" none~n");
-                                                  true ->
-                                                      [ io:format("~n #~p:~n\tCmd: ~p~n\tReply: ~p~n\tState: ~p~n",
-                                                                  [N,Cmd,Reply,State])
-                                                        || {N,Cmd,Reply,State} <- CmdsH ]
-                                              end,
-                                          %% result
-                                          io:format("~nRESULT:~n\t~p~n",[Res]),
-                                          %% state
-                                          io:format("~nSTATE:~n\t~p~n",[S]),
-                                          %% state is sane
-                                          io:format("~nSTATE IS SANE:~n\t~p~n",[state_is_sane(Mod, S)])
+                                          Now = erlang:now(),
+                                          FileName = counterexample_filename(Name),
+                                          FileIoDev = counterexample_open(FileName),
+                                          try
+                                              LenCmdsH = length(CmdsH),
+                                              Output = lists:flatten(
+                                                         [
+                                                          %% commands start
+                                                          io_lib:format("~nCOUNTEREXAMPLE START: ~p~n",[FileName]),
+                                                          %% duration
+                                                          io_lib:format("~nDURATION (secs):~n\t~p.~n",[erlang:round(timer:now_diff(Now,Start) / 1000000.0)]),
+                                                          %% options
+                                                          io_lib:format("~nOPTIONS:~n\t~p.~n",[Options]),
+                                                          %% history
+                                                          io_lib:format("~nHISTORY:", []),
+                                                          _ = if
+                                                                  CmdsH == [] ->
+                                                                      io_lib:format("~n none~n", []);
+                                                                  true ->
+                                                                      [ io_lib:format("~n ~p/~p:~n\t Cmd:~n\t\t~p.~n\t Reply:~n\t\t~p.~n\t State:~n\t\t~p.~n",
+                                                                                      [N,LenCmdsH,Cmd,Reply,State])
+                                                                        || {N,Cmd,Reply,State} <- CmdsH ]
+                                                              end,
+                                                          %% result
+                                                          io_lib:format("~nRESULT:~n\t~p.~n",[Res]),
+                                                          %% state
+                                                          io_lib:format("~nSTATE:~n\t~p.~n",[S]),
+                                                          %% state is sane
+                                                          io_lib:format("~nSTATE IS SANE:~n\t~p.~n",[Sane]),
+                                                          %% commands end
+                                                          io_lib:format("~nCOUNTEREXAMPLE END: ~p~n~n",[FileName])
+                                                         ]
+                                                        ),
+                                              %% counterexample
+                                              io:format(FileIoDev,"~n~n%% ~s~n~n",[string:join(re:split(Output, "\r?\n", [{return,list}]), "\n%% ")]),
+                                              io:format(FileIoDev,"~p.~n",[Cmds]),
+                                              %% stderr
+                                              io:format(standard_error, Output, [])
+                                          after
+                                              counterexample_close(FileIoDev)
+                                          end
                                       end,
                                       aggregate(Mod:aggregate(CmdsH),
                                                 (ok =:= Res
-                                                 andalso state_is_sane(Mod, S)
+                                                 andalso Sane
                                                  %% teardown
                                                  andalso ok =:= Mod:teardown(TestRef,S#state.mod_state))))
                                end));
@@ -160,15 +186,36 @@ qc_prop(Mod, Options)
                                                  %% whenfail
                                                  ?WHENFAIL(
                                                     begin
-                                                        %% commands
-                                                        FileName = write_commands(Name,Cmds),
-                                                        io:format("~nCOMMANDS:~n\t~p~n",[FileName]),
-                                                        %% history
-                                                        io:format("~nHISTORY:~n\t~p~n",[H]),
-                                                        %% history list
-                                                        io:format("~nHISTORY LIST:~n\t~p~n",[HL]),
-                                                        %% result
-                                                        io:format("~nRESULT:~n\t~p~n",[Res])
+                                                        Now = erlang:now(),
+                                                        FileName = counterexample_filename(Name),
+                                                        FileIoDev = counterexample_open(FileName),
+                                                        try
+                                                            Output = lists:flatten(
+                                                                       [
+                                                                        %% commands start
+                                                                        io_lib:format("~nCOUNTEREXAMPLE START: ~p~n",[FileName]),
+                                                                        %% duration
+                                                                        io_lib:format("~nDURATION (secs):~n\t~p.~n",[erlang:round(timer:now_diff(Now,Start) / 1000000.0)]),
+                                                                        %% options
+                                                                        io_lib:format("~nOPTIONS:~n\t~p.~n",[Options]),
+                                                                        %% history
+                                                                        io_lib:format("~nHISTORY:~n\t~p.~n", [H]),
+                                                                        %% history list
+                                                                        io_lib:format("~nHISTORY LIST:~n\t~p.~n", [HL]),
+                                                                        %% result
+                                                                        io_lib:format("~nRESULT:~n\t~p.~n",[Res]),
+                                                                        %% commands end
+                                                                        io_lib:format("~nCOUNTEREXAMPLE END: ~p~n~n",[FileName])
+                                                                       ]
+                                                                      ),
+                                                            %% counterexample
+                                                            io:format(FileIoDev,"~n~n%% ~s~n~n",[string:join(re:split(Output, "\r?\n", [{return,list}]), "\n%% ")]),
+                                                            io:format(FileIoDev,"~p.~n",[Cmds]),
+                                                            %% stderr
+                                                            io:format(standard_error, Output, [])
+                                                        after
+                                                            counterexample_close(FileIoDev)
+                                                        end
                                                     end,
                                                     aggregate(command_names(Cmds),
                                                               (ok =:= Res
@@ -222,13 +269,16 @@ postcondition(S,C,R) ->
 %%% Internal
 %%%----------------------------------------------------------------------
 
-write_commands(Name,Cmds) ->
+counterexample_filename(Name) ->
     {Mega, Sec, Micro} = now(),
-    FileName = lists:flatten(io_lib:format("~s-counterexample-~B-~B-~B.erl", [Name, Mega, Sec, Micro])),
-    write_commands(Name,Cmds,FileName).
+    lists:flatten(io_lib:format("~s-counterexample-~B-~B-~B.erl", [Name, Mega, Sec, Micro])).
 
-write_commands(_Name,Cmds,FileName) ->
-    ok = file:write_file(FileName, io_lib:format("[~p].", [Cmds])),
-    FileName.
+counterexample_open(FileName) ->
+    {ok, IoDev} = file:open(FileName, [write, exclusive]),
+    IoDev.
+
+counterexample_close(IoDev) ->
+    ok = file:close(IoDev),
+    ok.
 
 -endif. %% -ifdef(QC).
