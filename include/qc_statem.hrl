@@ -93,7 +93,7 @@ qc_counterexample_write(FileName) ->
     qc_counterexample_write(FileName, ?QC:counterexample()).
 
 qc_counterexample_write(FileName, CounterExample) ->
-    file:write_file(FileName, io_lib:format("~p.", [CounterExample])).
+    file:write_file(FileName, io_lib:format("~p.~n", [CounterExample])).
 
 
 %%%----------------------------------------------------------------------

@@ -152,7 +152,7 @@ qc_prop(Mod, Options)
                                                         ),
                                               %% counterexample
                                               io:format(FileIoDev,"~n~n%% ~s~n~n",[string:join(re:split(Output, "\r?\n", [{return,list}]), "\n%% ")]),
-                                              io:format(FileIoDev,"~p.~n",[Cmds]),
+                                              io:format(FileIoDev,"~p.~n",[[Cmds]]),
                                               %% stderr
                                               io:format(standard_error, Output, [])
                                           after
@@ -210,7 +210,7 @@ qc_prop(Mod, Options)
                                                                       ),
                                                             %% counterexample
                                                             io:format(FileIoDev,"~n~n%% ~s~n~n",[string:join(re:split(Output, "\r?\n", [{return,list}]), "\n%% ")]),
-                                                            io:format(FileIoDev,"~p.~n",[Cmds]),
+                                                            io:format(FileIoDev,"~p.~n",[[Cmds]]),
                                                             %% stderr
                                                             io:format(standard_error, Output, [])
                                                         after
