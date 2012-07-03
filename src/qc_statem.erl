@@ -24,9 +24,12 @@
 -include("qc_impl.hrl").
 
 %% API
--export([qc_sample/1, qc_sample/2]).
--export([qc_prop/1, qc_prop/2]).
--export([qc_gen_command/2]).
+-export([qc_run/3]).
+-export([qc_sample/2]).
+-export([qc_prop/2]).
+-export([qc_counterexample/3]).
+-export([qc_counterexample_read/3]).
+-export([qc_counterexample_write/2]).
 
 %% eqc_statem Callbacks
 -export([command/1, initial_state/0, initial_state/1, next_state/3, precondition/2, postcondition/3]).
@@ -46,7 +49,9 @@ behaviour_info(callbacks) ->
      , {teardown,1}
      , {teardown,2}
      , {aggregate,1}
-    ].
+    ];
+behaviour_info(_Other) ->
+	undefined.
 
 %%%----------------------------------------------------------------------
 %%% types and records
@@ -61,27 +66,48 @@ behaviour_info(callbacks) ->
 %%%----------------------------------------------------------------------
 %%% API
 %%%----------------------------------------------------------------------
-
--spec qc_sample(module()) -> any().
-qc_sample(Mod) ->
-    qc_sample(Mod, []).
+-spec qc_run(module(), non_neg_integer(), [{name,string()} | cover | {cover,[module()]} | parallel | noshrink | {sometimes,pos_integer()} | any()]) -> boolean().
+qc_run(Mod, NumTests, Options) ->
+    Name = proplists:get_value(name, Options, name(Mod)),
+    Cover = proplists:get_value(cover, Options, false),
+    if is_list(Cover) ->
+            cover_setup(Cover);
+       Cover ->
+            cover_setup([Mod]);
+       true ->
+            ok
+    end,
+    try
+        Options1 = [{name,Name}|proplists:delete(name, Options)],
+        Options2 = proplists:delete(cover, Options1),
+        case proplists:get_bool(noshrink, Options2) of
+            false ->
+                ?QC:quickcheck(numtests(NumTests, qc_prop(Mod, Options2)));
+            true ->
+                Options3 = proplists:delete(noshrink, Options2),
+                ?QC:quickcheck(numtests(NumTests, noshrink(qc_prop(Mod, Options3))))
+        end
+    after
+        if
+            is_list(Cover) ->
+                cover_teardown(Cover, Name);
+            Cover ->
+                cover_teardown([Mod], Name);
+            true ->
+                ok
+        end
+    end.
 
 -spec qc_sample(module(), proplist()) -> any().
-qc_sample(Mod, Options)
-  when is_atom(Mod), is_list(Options) ->
+qc_sample(Mod, Options) ->
     %% sample
     Params = [{mod,Mod},{options,Options}],
     ?QC_GEN:sample(with_parameters(Params,
                                    ?LET(InitialState,initial_state(Mod),
                                         command(InitialState)))).
 
--spec qc_prop(module()) -> any().
-qc_prop(Mod) ->
-    qc_prop(Mod, []).
-
 -spec qc_prop(module(), proplist()) -> any().
-qc_prop(Mod, Options)
-  when is_atom(Mod), is_list(Options) ->
+qc_prop(Mod, Options) ->
     %% setup and teardown
     Start = erlang:now(),
     {ok,TestRefOnce} = Mod:setup(true),
@@ -222,14 +248,17 @@ qc_prop(Mod, Options)
                                                                %% teardown
                                                                andalso ok =:= Mod:teardown(TestRef,undefined))))
                                              end))))
-    end;
-qc_prop(_Mod, _Options) ->
-    exit(badarg).
+    end.
 
--spec qc_gen_command(module(), modstate()) -> any().
-qc_gen_command(Mod, ModState) ->
-    Mod:command_gen(Mod, ModState).
+qc_counterexample(Module, Options, CounterExample) ->
+    ?QC:check(qc_prop(Module, Options), CounterExample).
 
+qc_counterexample_read(Module, Options, FileName) ->
+    {ok, [CounterExample]} = file:consult(FileName),
+    qc_counterexample(Module, Options, CounterExample).
+
+qc_counterexample_write(FileName, CounterExample) ->
+    file:write_file(FileName, io_lib:format("~p.~n", [CounterExample])).
 
 %%%----------------------------------------------------------------------
 %%% Callbacks - eqc_statem
@@ -268,6 +297,32 @@ postcondition(S,C,R) ->
 %%%----------------------------------------------------------------------
 %%% Internal
 %%%----------------------------------------------------------------------
+
+
+%%%----------------------------------------------------------------------
+%%% Internal
+%%%----------------------------------------------------------------------
+name(Mod) ->
+    {{Year,Month,Day},{Hour,Minute,Second}} = calendar:local_time(),
+    lists:flatten(io_lib:format("~w-~4..0B~2..0B~2..0B-~2..0B~2..0B~2..0B",
+                                [Mod,Year,Month,Day,Hour,Minute,Second])).
+
+cover_setup(Mods) when is_list(Mods) ->
+    Fun = fun(Mod) ->
+                  _ = cover:reset(Mod),
+                  {ok, _} = cover:compile_beam(Mod)
+          end,
+    lists:foreach(Fun, Mods).
+
+cover_teardown(Mods, Name) when is_list(Mods) ->
+    Fun = fun(Mod) ->
+                  FileName = Name ++ "-cover-" ++ atom_to_list(Mod),
+                  io:format("~nCOVER:~n\t~p.{txt,html}~n",[FileName]),
+                  {ok, _} = cover:analyse_to_file(Mod, FileName ++ ".txt", []),
+                  {ok, _} = cover:analyse_to_file(Mod, FileName ++ ".html", [html]),
+                  _ = cover:reset(Mod)
+          end,
+    lists:foreach(Fun, Mods).
 
 counterexample_filename(Name) ->
     {Mega, Sec, Micro} = now(),

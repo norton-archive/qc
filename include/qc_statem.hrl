@@ -20,109 +20,83 @@
 -ifndef(qc_statem).
 -define(qc_statem, true).
 
-%% API
--export([qc_run/0, qc_run/1, qc_run/2]).
--export([qc_sample/0, qc_sample/1, qc_prop/0, qc_prop/1]).
--export([qc_counterexample/0, qc_counterexample/1, qc_counterexample/2]).
--export([qc_counterexample_read/1, qc_counterexample_write/1, qc_counterexample_write/2]).
+%% boilerplate API
+%% -export([qc_run/0, qc_run/1, qc_run/2, qc_run/3]).
+%% -export([qc_sample/0, qc_sample/1, qc_sample/2, qc_prop/0, qc_prop/1, qc_prop/2]).
+%% -export([qc_counterexample/0, qc_counterexample/1, qc_counterexample/2, qc_counterexample/3]).
+%% -export([qc_counterexample_read/1, qc_counterexample_read/2, qc_counterexample_read/3]).
+%% -export([qc_counterexample_write/1, qc_counterexample_write/2]).
 
 -include("qc.hrl").
 
-%%%----------------------------------------------------------------------
-%%% API
-%%%----------------------------------------------------------------------
+%%% ----------------------------------------------------------------------
+%%%  boilerplate API
+%%% ----------------------------------------------------------------------
 
--spec qc_run() -> boolean().
-qc_run() ->
-    qc_run(500).
+%% -spec qc_run() -> boolean().
+%% qc_run() ->
+%%     qc_run(500).
 
--spec qc_run(non_neg_integer()) -> boolean().
-qc_run(NumTests) ->
-    qc_run(NumTests, []).
+%% -spec qc_run(non_neg_integer()) -> boolean().
+%% qc_run(NumTests) ->
+%%     qc_run(NumTests, []).
 
--spec qc_run(non_neg_integer(), [{name,string()} | cover | {cover,[module()]} | parallel | noshrink | {sometimes,pos_integer()} | any()]) -> boolean().
-qc_run(NumTests, Options) ->
-    Name = proplists:get_value(name, Options, name(?MODULE)),
-    Cover = proplists:get_value(cover, Options, false),
-    _ = if is_list(Cover) orelse Cover -> cover_setup(Cover); true -> ok end,
-    try
-        Options1 = [{name,Name}|proplists:delete(name, Options)],
-        Options2 = proplists:delete(cover, Options1),
-        case proplists:get_bool(noshrink, Options2) of
-            false ->
-                ?QC:quickcheck(numtests(NumTests, qc_prop(Options2)));
-            true ->
-                Options3 = proplists:delete(noshrink, Options2),
-                ?QC:quickcheck(numtests(NumTests, noshrink(qc_prop(Options3))))
-        end
-    after
-        _ = if is_list(Cover) orelse Cover -> cover_teardown(Cover, Name); true -> ok end
-    end.
+%% -spec qc_run(non_neg_integer(), [{name,string()} | cover | {cover,[module()]} | parallel | noshrink | {sometimes,pos_integer()} | any()]) -> boolean().
+%% qc_run(NumTests, Options) ->
+%%     qc_run(?MODULE, NumTests, Options).
 
-%% sample
-qc_sample() ->
-    qc_sample([]).
+%% -spec qc_run(module(), non_neg_integer(), [{name,string()} | cover | {cover,[module()]} | parallel | noshrink | {sometimes,pos_integer()} | any()]) -> boolean().
+%% qc_run(Module, NumTests, Options) ->
+%%     qc_statem:qc_run(Module, NumTests, Options).
 
-qc_sample(Options) ->
-    qc_statem:qc_sample(?MODULE, Options).
+%% %% sample
+%% qc_sample() ->
+%%     qc_sample([]).
 
-%% prop
-qc_prop() ->
-    qc_prop([]).
+%% qc_sample(Options) ->
+%%     qc_sample(?MODULE, Options).
 
-qc_prop(Options) ->
-    qc_statem:qc_prop(?MODULE, Options).
+%% qc_sample(Module, Options) ->
+%%     qc_statem:qc_sample(Module, Options).
 
-%% counterexample
-qc_counterexample() ->
-    qc_counterexample([]).
+%% %% prop
+%% qc_prop() ->
+%%     qc_prop([]).
 
-qc_counterexample(Options) ->
-    qc_counterexample(Options, ?QC:counterexample()).
+%% qc_prop(Options) ->
+%%     qc_prop(?MODULE, Options).
 
-qc_counterexample(Options, CounterExample) ->
-    ?QC:check(qc_prop(Options), CounterExample).
+%% qc_prop(Module, Options) ->
+%%     qc_statem:qc_prop(Module, Options).
 
-%% counterexample read
-qc_counterexample_read(FileName) ->
-    {ok, [CounterExample]} = file:consult(FileName),
-    qc_counterexample([], CounterExample).
+%% %% counterexample
+%% qc_counterexample() ->
+%%     qc_counterexample([]).
 
-%% counterexample write
-qc_counterexample_write(FileName) ->
-    qc_counterexample_write(FileName, ?QC:counterexample()).
+%% qc_counterexample(Options) ->
+%%     qc_counterexample(Options, ?QC:counterexample()).
 
-qc_counterexample_write(FileName, CounterExample) ->
-    file:write_file(FileName, io_lib:format("~p.~n", [CounterExample])).
+%% qc_counterexample(Options, CounterExample) ->
+%%     qc_counterexample(?MODULE, Options, CounterExample).
 
+%% qc_counterexample(Module, Options, CounterExample) ->
+%%     qc_statem:qc_counterexample(Module, Options, CounterExample).
 
-%%%----------------------------------------------------------------------
-%%% Internal
-%%%----------------------------------------------------------------------
-name(Mod) ->
-    {{Year,Month,Day},{Hour,Minute,Second}} = calendar:local_time(),
-    lists:flatten(io_lib:format("~s-~4..0B~2..0B~2..0B-~2..0B~2..0B~2..0B",
-                                [Mod,Year,Month,Day,Hour,Minute,Second])).
+%% %% counterexample read
+%% qc_counterexample_read(FileName) ->
+%%     qc_counterexample_read([], FileName).
 
-cover_setup(true) ->
-    cover_setup([?MODULE]);
-cover_setup(Mods) when is_list(Mods) ->
-    [ begin
-          _ = cover:reset(Mod),
-          {ok, _} = cover:compile_beam(Mod)
-      end || Mod <- Mods ],
-    ok.
+%% qc_counterexample_read(Options, FileName) ->
+%%     qc_counterexample_read(?MODULE, Options, FileName).
 
-cover_teardown(true, Name) ->
-    cover_teardown([?MODULE], Name);
-cover_teardown(Mods, Name) when is_list(Mods) ->
-    [ begin
-          FileName = Name ++ "-cover-" ++ atom_to_list(Mod),
-          io:format("~nCOVER:~n\t~p.{txt,html}~n",[FileName]),
-          {ok, _} = cover:analyse_to_file(Mod, FileName ++ ".txt", []),
-          {ok, _} = cover:analyse_to_file(Mod, FileName ++ ".html", [html]),
-          _ = cover:reset(Mod)
-      end || Mod <- Mods ],
-    ok.
+%% qc_counterexample_read(Module, Options, FileName) ->
+%%     qc_statem:qc_counterexample_read(Module, Options, FileName).
+
+%% %% counterexample write
+%% qc_counterexample_write(FileName) ->
+%%     qc_counterexample_write(FileName, ?QC:counterexample()).
+
+%% qc_counterexample_write(FileName, CounterExample) ->
+%%     qc_statem:qc_counterexample_write(FileName, CounterExample).
 
 -endif. %% -ifdef(qc_statem).
