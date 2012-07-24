@@ -43,7 +43,7 @@
         ]).
 
 %% @NOTE For boilerplate exports, see "qc_statem.hrl"
--include_lib("qc/include/qc_statem.hrl").
+-include("qc_statem.hrl").
 
 
 %%%----------------------------------------------------------------------
