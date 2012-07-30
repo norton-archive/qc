@@ -28,6 +28,7 @@
   {mod, {qc_app, []}},
   {modules, [qc
              , qc_gen
+             , qc_gen_http
              , qc_slave
              , qc_statem
             ]},
