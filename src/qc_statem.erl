@@ -324,9 +324,11 @@ cover_teardown(Mods, Name) when is_list(Mods) ->
           end,
     lists:foreach(Fun, Mods).
 
+counterexample_filename(Name) when is_tuple(Name) ->
+    counterexample_filename(io_lib:format("~w", [Name]));
 counterexample_filename(Name) ->
     {Mega, Sec, Micro} = now(),
-    lists:flatten(io_lib:format("~w-counterexample-~B-~B-~B.erl", [Name, Mega, Sec, Micro])).
+    lists:flatten(io_lib:format("~s-counterexample-~B-~B-~B.erl", [Name, Mega, Sec, Micro])).
 
 counterexample_open(FileName) ->
     {ok, IoDev} = file:open(FileName, [write, exclusive]),
