@@ -18,7 +18,7 @@ this recipe:</p>
 
 <pre><tt>$ mkdir working-directory-name
 $ cd working-directory-name
-$ git clone git://github.com/norton/qc.git qc
+$ git clone https://github.com/norton/qc.git qc
 $ cd qc
 $ ./rebar get-deps
 $ ./rebar clean
