@@ -58,21 +58,21 @@ behaviour_info(_Other) ->
 %%%----------------------------------------------------------------------
 %%% API
 %%%----------------------------------------------------------------------
-qc_run(Module, NumTests, Options) ->
-    (impl(Module)):qc_run(NumTests, Options).
+qc_run(Mod, NumTests, Options) ->
+    (impl(Mod)):qc_run(NumTests, Options).
 
-qc_sample(Module, Options) ->
-    (impl(Module)):qc_sample(Options).
+qc_sample(Mod, Options) ->
+    (impl(Mod)):qc_sample(Options).
 
 qc_prop(Mod, Options) ->
     (impl(Mod)):qc_prop(Options).
 
-qc_counterexample(Module, Options, CounterExample) ->
-    ?QC:check(qc_prop(Module, Options), CounterExample).
+qc_counterexample(Mod, Options, CounterExample) ->
+    ?QC:check(qc_prop(Mod, Options), CounterExample).
 
-qc_counterexample_read(Module, Options, FileName) ->
+qc_counterexample_read(Mod, Options, FileName) ->
     {ok, [CounterExample]} = file:consult(FileName),
-    qc_counterexample(Module, Options, CounterExample).
+    qc_counterexample(Mod, Options, CounterExample).
 
 qc_counterexample_write(FileName, CounterExample) ->
     file:write_file(FileName, io_lib:format("~p.~n", CounterExample)).
@@ -80,7 +80,7 @@ qc_counterexample_write(FileName, CounterExample) ->
 %%%----------------------------------------------------------------------
 %%% Internal
 %%%----------------------------------------------------------------------
-impl(Module) ->
-    qc_statem_impl:new(Module).
+impl(Mod) ->
+    qc_statem_impl:new(Mod).
 
 -endif. %% -ifdef(QC).
