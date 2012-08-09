@@ -31,9 +31,9 @@
 
 %% qc_statem Callbacks
 -behaviour(qc_statem).
--export([command_gen/2]).
--export([initial_state/0, state_is_sane/1, next_state/3, precondition/2, postcondition/3]).
--export([setup/1, teardown/1, teardown/2, aggregate/1]).
+-export([scenario_gen/0, command_gen/1]).
+-export([initial_state/1, state_is_sane/1, next_state/3, precondition/2, postcondition/3]).
+-export([setup/0, setup/1, teardown/1, teardown/2, aggregate/1]).
 
 %% DEBUG -compile(export_all).
 -export([new/2,
@@ -95,25 +95,27 @@ qc_counterexample_write(FileName, CounterExample) ->
 %%%----------------------------------------------------------------------
 %%% qc_statem Callbacks
 %%%----------------------------------------------------------------------
+scenario_gen() ->
+    undefined.
 
-command_gen(Mod,#state{parallel=false}=S) ->
-    serial_command_gen(Mod,S);
-command_gen(Mod,#state{parallel=true}=S) ->
-    parallel_command_gen(Mod,S).
+command_gen(#state{parallel=false}=S) ->
+    serial_command_gen(S);
+command_gen(#state{parallel=true}=S) ->
+    parallel_command_gen(S).
 
-serial_command_gen(_Mod,#state{tab=undefined}) ->
+serial_command_gen(#state{tab=undefined}) ->
     {call,?MODULE,new,[?TAB, [named_table, public, ordered_set, {keypos,#obj.key}]]};
-serial_command_gen(_Mod,#state{tab=Tab}=S) ->
+serial_command_gen(#state{tab=Tab}=S) ->
     oneof([{call,?MODULE,insert,[Tab,gen_obj(S)]},
            {call,?MODULE,lookup,[Tab,gen_key(S)]},
            {call,?MODULE,next,[Tab,gen_key(S)]}
           ]).
 
-parallel_command_gen(_Mod,_S) ->
+parallel_command_gen(_S) ->
     todo.
 
--spec initial_state() -> #state{}.
-initial_state() ->
+-spec initial_state(term()) -> #state{}.
+initial_state(_Scenario) ->
     ?LET(Parallel,parameter(parallel,false),
          #state{parallel=Parallel}).
 
@@ -158,13 +160,18 @@ postcondition(#state{objs=Objs}, {call,_,next,[_Tab,Key]}, Res) ->
 postcondition(_S, {call,_,_,_}, _Res) ->
     false.
 
--spec setup(boolean()) -> {ok, term()}.
-setup(_Hard) ->
-    catch ets:delete(?TAB),
+-spec setup() -> ok.
+setup() ->
+    ok.
+
+-spec setup(term()) -> {ok, term()}.
+setup(_Scenario) ->
+    teardown_table(?TAB),
     {ok, unused}.
 
 -spec teardown(term()) -> ok.
 teardown(unused) ->
+    teardown_table(?TAB),
     ok.
 
 -spec teardown(term(), #state{}) -> ok.
@@ -217,6 +224,9 @@ insert_objs(OldObjs, [#obj{key=K}=H|T]) ->
 %%%----------------------------------------------------------------------
 %%% Internal - Implementation
 %%%----------------------------------------------------------------------
+
+teardown_table(Tab) ->
+    catch ets:delete(Tab).
 
 new(Tab, Options) ->
     catch ets:new(Tab, Options).

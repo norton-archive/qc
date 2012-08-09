@@ -31,9 +31,9 @@
 
 %% qc_statem Callbacks
 -behaviour(qc_statem).
--export([command_gen/2]).
--export([initial_state/0, state_is_sane/1, next_state/3, precondition/2, postcondition/3]).
--export([setup/1, teardown/1, teardown/2, aggregate/1]).
+-export([scenario_gen/0, command_gen/1]).
+-export([initial_state/1, state_is_sane/1, next_state/3, precondition/2, postcondition/3]).
+-export([setup/0, setup/1, teardown/1, teardown/2, aggregate/1]).
 
 %% DEBUG -compile(export_all).
 %% Implementation
@@ -103,15 +103,17 @@ qc_counterexample_write(FileName, CounterExample) ->
 %%%----------------------------------------------------------------------
 %%% qc_statem Callbacks
 %%%----------------------------------------------------------------------
+scenario_gen() ->
+    undefined.
 
-command_gen(Mod,#state{parallel=false}=S) ->
-    serial_command_gen(Mod,S);
-command_gen(Mod,#state{parallel=true}=S) ->
-    parallel_command_gen(Mod,S).
+command_gen(#state{parallel=false}=S) ->
+    serial_command_gen(S);
+command_gen(#state{parallel=true}=S) ->
+    parallel_command_gen(S).
 
-serial_command_gen(_Mod,#state{tab=undefined}=S) ->
+serial_command_gen(#state{tab=undefined}=S) ->
     {call,?MODULE,new,[?TAB,gen_options(new,S)]};
-serial_command_gen(_Mod,#state{tab=Tab}=S) ->
+serial_command_gen(#state{tab=Tab}=S) ->
     oneof([{call,?MODULE,insert,[Tab,oneof([gen_obj(S),gen_objs(S)])]}]
           ++ [{call,?MODULE,insert_new,[Tab,oneof([gen_obj(S),gen_objs(S)])]}]
           %% @TODO ++ [{call,?MODULE,delete,[Tab]}]
@@ -124,9 +126,9 @@ serial_command_gen(_Mod,#state{tab=Tab}=S) ->
           ++ [{call,?MODULE,tab2list,[Tab]}]
          ).
 
-parallel_command_gen(_Mod,#state{tab=undefined}=S) ->
+parallel_command_gen(#state{tab=undefined}=S) ->
     {call,?MODULE,new,[?TAB,gen_options(new,S)]};
-parallel_command_gen(_Mod,#state{tab=Tab}=S) ->
+parallel_command_gen(#state{tab=Tab}=S) ->
     oneof([{call,?MODULE,insert,[Tab,oneof([gen_obj(S),gen_objs(S)])]}]
           ++ [{call,?MODULE,insert_new,[Tab,oneof([gen_obj(S),gen_objs(S)])]}]
           %% @TODO ++ [{call,?MODULE,delete,[Tab,gen_key(S)]}]
@@ -136,8 +138,8 @@ parallel_command_gen(_Mod,#state{tab=Tab}=S) ->
           ++ [{call,?MODULE,next,[Tab,gen_key(S)]}]
          ).
 
--spec initial_state() -> #state{}.
-initial_state() ->
+-spec initial_state(term()) -> #state{}.
+initial_state(_Scenario) ->
     ?LET(Parallel,parameter(parallel,false),
          #state{parallel=Parallel}).
 
@@ -230,8 +232,12 @@ postcondition(#state{type=ordered_set}=S, {call,_,tab2list,[_Tab]}, Res) ->
 postcondition(_S, {call,_,_,_}, _Res) ->
     false.
 
--spec setup(boolean()) -> {ok, term()}.
-setup(_Hard) ->
+-spec setup() -> ok.
+setup() ->
+    ok.
+
+-spec setup(term()) -> {ok, term()}.
+setup(_Scenario) ->
     teardown_table(?TAB),
     {ok, unused}.
 
@@ -377,14 +383,14 @@ sort(#state{objs=L}) ->
 %%% Internal - Implementation
 %%%----------------------------------------------------------------------
 
-teardown_table(Name) ->
-    catch ets:delete(Name).
+teardown_table(Tab) ->
+    catch ets:delete(Tab).
 
 is_table(Tab) ->
     is_atom(Tab).
 
-new(Name, Options) ->
-    catch ets:new(Name, Options).
+new(Tab, Options) ->
+    catch ets:new(Tab, Options).
 
 insert(Tab, ObjOrObjs) ->
     catch ets:insert(Tab, ObjOrObjs).
