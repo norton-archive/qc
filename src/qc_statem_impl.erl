@@ -102,22 +102,18 @@ qc_prop(Options) ->
 %%%----------------------------------------------------------------------
 
 %% scenario generator
--spec scenario() -> Gen::term().
 scenario() ->
     MOD:scenario_gen().
 
 %% command generator
--spec command(State::term()) -> Gen::term().
 command(S) ->
     MOD:command_gen(S).
 
 %% initial state
--spec initial_state(Scenario::term()) -> State::term().
 initial_state(Scenario) ->
     MOD:initial_state(Scenario).
 
 %% state is sane
--spec state_is_sane(State::term()) -> boolean().
 state_is_sane(S) ->
     MOD:state_is_sane(S).
 
@@ -134,23 +130,18 @@ postcondition(S,C,R) ->
     MOD:postcondition(S,C,R).
 
 %% setup
--spec setup() -> ok.
 setup() ->
     MOD:setup().
 
 %% setup
--spec setup(Scenario::term()) -> {ok, Ref::term()}.
 setup(Scenario) ->
     MOD:setup(Scenario).
 
 %% teardown
--spec teardown(Ref::term(), State::term() | undefined) -> ok.
 teardown(Ref, State) ->
     MOD:teardown(Ref, State).
 
 %% aggregate
--spec aggregate([{N::integer(), Cmd::term(), Reply::term(), State::term()}])
-               -> [term()].
 aggregate(L) ->
     MOD:aggregate(L).
 

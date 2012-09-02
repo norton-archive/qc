@@ -32,6 +32,25 @@
 -export([qc_counterexample_write/2]).
 
 %% Interface Functions
+-ifndef(old_callbacks).
+
+-type call() :: {call, Mod::atom(), Fun::atom(), Args::list(term())}.
+-type var() :: {var, integer()}.
+
+-callback scenario_gen() -> Gen::term().
+-callback command_gen(SymState::term()) -> Gen::term().
+-callback initial_state(Scenario::term()) -> SymState::term().
+-callback state_is_sane(DynState::term()) -> boolean().
+-callback next_state(SymState::term(), R::var(), C::call()) -> SymState::term().
+-callback precondition(SymState::term(), C::call()) -> boolean().
+-callback postcondition(DynState::term(), C::call(), R::term()) -> boolean().
+-callback setup() -> ok.
+-callback setup(Scenario::term()) -> {ok, Ref::term()}.
+-callback teardown(Ref::term(), DynState::term() | undefined) -> ok.
+-callback aggregate([{N::integer(), Call::term(), R::term(), DynState::term()}]) -> [term()].
+
+-else. % -ifndef(old_callbacks).
+
 -export([behaviour_info/1]).
 
 %% Define the behaviour's required mods.
@@ -50,6 +69,8 @@ behaviour_info(callbacks) ->
     ];
 behaviour_info(_Other) ->
 	undefined.
+
+-endif. % -ifndef(old_callbacks).
 
 %%%----------------------------------------------------------------------
 %%% types and records
