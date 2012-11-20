@@ -19,9 +19,10 @@
 
 -module(qc).
 
+-ifdef(QC).
+
 -include("qc_impl.hrl").
 
--ifdef(QC).
 -include_lib("eunit/include/eunit.hrl").
 
 -export([module/2]).

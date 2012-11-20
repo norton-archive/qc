@@ -23,11 +23,11 @@
 
 -module(qc_gen_http).
 
+-ifdef(QC).
+
 -compile(export_all).
 
 -include("qc_impl.hrl").
-
--ifdef(QC).
 
 
 %% ---rfc2616.txt-------

@@ -19,11 +19,11 @@
 
 -module(qc_gen).
 
+-ifdef(QC).
+
 -compile(export_all).
 
 -include("qc_impl.hrl").
-
--ifdef(QC).
 
 %% helper for sizing down recursive generators
 -define(SIZEDOWN(G),
