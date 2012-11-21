@@ -1,40 +1,16 @@
 
 
 #Module qc_statem#
-* [Data Types](#types)
 * [Function Index](#index)
 * [Function Details](#functions)
 
 
-
-
-
-<a name="types"></a>
-
-##Data Types##
-
-
-
-
-###<a name="type-modstate">modstate()</a>##
-
-
-
-__abstract datatype__: `modstate()`
-
-
-
-###<a name="type-proplist">proplist()</a>##
-
-
-
-<pre>proplist() = [atom() | {atom(), term()}]</pre>
 <a name="index"></a>
 
 ##Function Index##
 
 
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#behaviour_info-1">behaviour_info/1</a></td><td></td></tr><tr><td valign="top"><a href="#command-1">command/1</a></td><td></td></tr><tr><td valign="top"><a href="#initial_state-0">initial_state/0</a></td><td></td></tr><tr><td valign="top"><a href="#initial_state-1">initial_state/1</a></td><td></td></tr><tr><td valign="top"><a href="#next_state-3">next_state/3</a></td><td></td></tr><tr><td valign="top"><a href="#postcondition-3">postcondition/3</a></td><td></td></tr><tr><td valign="top"><a href="#precondition-2">precondition/2</a></td><td></td></tr><tr><td valign="top"><a href="#qc_gen_command-2">qc_gen_command/2</a></td><td></td></tr><tr><td valign="top"><a href="#qc_prop-1">qc_prop/1</a></td><td></td></tr><tr><td valign="top"><a href="#qc_prop-2">qc_prop/2</a></td><td></td></tr><tr><td valign="top"><a href="#qc_sample-1">qc_sample/1</a></td><td></td></tr><tr><td valign="top"><a href="#qc_sample-2">qc_sample/2</a></td><td></td></tr></table>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#behaviour_info-1">behaviour_info/1</a></td><td></td></tr><tr><td valign="top"><a href="#qc_counterexample-3">qc_counterexample/3</a></td><td></td></tr><tr><td valign="top"><a href="#qc_counterexample_read-3">qc_counterexample_read/3</a></td><td></td></tr><tr><td valign="top"><a href="#qc_counterexample_write-2">qc_counterexample_write/2</a></td><td></td></tr><tr><td valign="top"><a href="#qc_prop-2">qc_prop/2</a></td><td></td></tr><tr><td valign="top"><a href="#qc_run-3">qc_run/3</a></td><td></td></tr><tr><td valign="top"><a href="#qc_sample-2">qc_sample/2</a></td><td></td></tr></table>
 
 
 <a name="functions"></a>
@@ -46,116 +22,47 @@ __abstract datatype__: `modstate()`
 ###behaviour_info/1##
 
 
+`behaviour_info(Other) -> any()`
+
+<a name="qc_counterexample-3"></a>
+
+###qc_counterexample/3##
 
 
-`behaviour_info(X1) -> any()`
+`qc_counterexample(Mod, Options, CounterExample) -> any()`
 
-<a name="command-1"></a>
+<a name="qc_counterexample_read-3"></a>
 
-###command/1##
-
-
+###qc_counterexample_read/3##
 
 
-`command(S) -> any()`
+`qc_counterexample_read(Mod, Options, FileName) -> any()`
 
-<a name="initial_state-0"></a>
+<a name="qc_counterexample_write-2"></a>
 
-###initial_state/0##
-
-
+###qc_counterexample_write/2##
 
 
-`initial_state() -> any()`
-
-<a name="initial_state-1"></a>
-
-###initial_state/1##
-
-
-
-
-`initial_state(Mod) -> any()`
-
-<a name="next_state-3"></a>
-
-###next_state/3##
-
-
-
-
-`next_state(S, R, C) -> any()`
-
-<a name="postcondition-3"></a>
-
-###postcondition/3##
-
-
-
-
-`postcondition(S, C, R) -> any()`
-
-<a name="precondition-2"></a>
-
-###precondition/2##
-
-
-
-
-`precondition(S, C) -> any()`
-
-<a name="qc_gen_command-2"></a>
-
-###qc_gen_command/2##
-
-
-
-
-<pre>qc_gen_command(Mod::module(), ModState::<a href="#type-modstate">modstate()</a>) -> any()</pre>
-<br></br>
-
-
-<a name="qc_prop-1"></a>
-
-###qc_prop/1##
-
-
-
-
-<pre>qc_prop(Mod::module()) -&gt; any()</pre>
-<br></br>
-
+`qc_counterexample_write(FileName, CounterExample) -> any()`
 
 <a name="qc_prop-2"></a>
 
 ###qc_prop/2##
 
 
+`qc_prop(Mod, Options) -> any()`
+
+<a name="qc_run-3"></a>
+
+###qc_run/3##
 
 
-<pre>qc_prop(Mod::module(), Options::<a href="#type-proplist">proplist()</a>) -> any()</pre>
-<br></br>
-
-
-<a name="qc_sample-1"></a>
-
-###qc_sample/1##
-
-
-
-
-<pre>qc_sample(Mod::module()) -&gt; any()</pre>
-<br></br>
-
+`qc_run(Mod, NumTests, Options) -> any()`
 
 <a name="qc_sample-2"></a>
 
 ###qc_sample/2##
 
 
-
-
-<pre>qc_sample(Mod::module(), Options::<a href="#type-proplist">proplist()</a>) -> any()</pre>
-<br></br>
-
+`qc_sample(Mod, Options) -> any()`
 

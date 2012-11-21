@@ -5,10 +5,6 @@
 * [Function Details](#functions)
 
 
-
-
-
-
 __Authors:__ Ulf Wiger ([`ulf.wiger@erlang-solutions.com`](mailto:ulf.wiger@erlang-solutions.com)).<a name="index"></a>
 
 ##Function Index##
@@ -26,15 +22,11 @@ __Authors:__ Ulf Wiger ([`ulf.wiger@erlang-solutions.com`](mailto:ulf.wiger@erla
 ###restart_slave/1##
 
 
-
-
 `restart_slave(Name) -> any()`
 
 <a name="restart_slaves-1"></a>
 
 ###restart_slaves/1##
-
-
 
 
 `restart_slaves(Names) -> any()`
@@ -44,15 +36,11 @@ __Authors:__ Ulf Wiger ([`ulf.wiger@erlang-solutions.com`](mailto:ulf.wiger@erla
 ###start_slave/1##
 
 
-
-
 `start_slave(Name) -> any()`
 
 <a name="start_slaves-1"></a>
 
 ###start_slaves/1##
-
-
 
 
 `start_slaves(Names) -> any()`
@@ -62,15 +50,11 @@ __Authors:__ Ulf Wiger ([`ulf.wiger@erlang-solutions.com`](mailto:ulf.wiger@erla
 ###stop_slave/1##
 
 
-
-
 `stop_slave(Name) -> any()`
 
 <a name="stop_slaves-1"></a>
 
 ###stop_slaves/1##
-
-
 
 
 `stop_slaves(Names) -> any()`
