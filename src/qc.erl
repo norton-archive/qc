@@ -37,7 +37,7 @@
 module(Options, Module) ->
     proper:module(Module, Options).
 
-%% @doc PropER doesn't have a server.  Always return true.
+%% @doc PropER doesn\'t have a server.  Always return true.
 start() ->
     true.
 -endif. %% -ifdef(PROPER).
@@ -49,7 +49,7 @@ module(Options, Module) ->
 
 %% @doc Starts (and possibly restarts) the QuickCheck server. If
 %% another instance is not running, start the server and return the
-%% server's process id.  If another instance is already running,
+%% server\'s process id.  If another instance is already running,
 %% return true.  Otherwise, forcefully restart the server.
 start() ->
     try
@@ -62,7 +62,7 @@ start() ->
     end.
 -endif. %% -ifdef(EQC).
 
-%% @doc Disable QuickCheck's test output (i.e. the "dots")
+%% @doc Disable QuickCheck\'s test output (i.e. the "dots")
 silent(Prop) ->
     on_output(silent_printer(), Prop).
 

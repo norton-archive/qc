@@ -1,6 +1,6 @@
 %%% -*- mode: erlang -*-
 
-{edoc_opts, [{doclet, edown_doclet}
+{edoc_opts, [{doclet, asciiedown_doclet}
              , {app_default, "http://www.erlang.org/doc/man"}
              , {new, true}
              , {packages, false}
