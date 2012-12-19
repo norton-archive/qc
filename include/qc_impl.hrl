@@ -24,12 +24,21 @@
 -undef(PROPER).
 -define(PROPER, true).
 -undef(EQC).
+-undef(TRIQ).
+-endif.
+
+-ifdef(QC_TRIQ).
+-undef(TRIQ).
+-define(TRIQ, true).
+-undef(EQC).
+-undef(PROPER).
 -endif.
 
 -ifdef(QC_EQC).
 -undef(EQC).
 -define(EQC, true).
 -undef(PROPER).
+-undef(TRIQ).
 -endif.
 
 -ifdef(PROPER).
@@ -41,6 +50,18 @@
 -define(SOMETIMES(_N,PROP), PROP).
 -undef(EQC).
 -endif. %% -ifdef(PROPER).
+
+-ifdef(TRIQ).
+-include_lib("triq/include/triq.hrl").
+-include_lib("triq/include/triq_statem.hrl").
+-undef(QC).
+-define(QC, triq).
+-define(QC_GEN, triq_dom).
+-define(ALWAYS(_N,PROP), PROP).
+-define(SOMETIMES(_N,PROP), PROP).
+-define(SHRINK(G,_GS), G).
+-undef(EQC).
+-endif. %% -ifdef(TRIQ).
 
 -ifdef(EQC).
 -include_lib("eqc/include/eqc.hrl").
