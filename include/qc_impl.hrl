@@ -38,6 +38,7 @@
 -define(QC, proper).
 -define(QC_GEN, proper_gen).
 -define(ALWAYS(_N,PROP), PROP).
+-define(SOMETIMES(_N,PROP), PROP).
 -undef(EQC).
 -endif. %% -ifdef(PROPER).
 

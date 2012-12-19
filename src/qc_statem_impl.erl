@@ -148,9 +148,9 @@ aggregate(L) ->
 %%%----------------------------------------------------------------------
 %%% Internal
 %%%----------------------------------------------------------------------
-qc_prop1(false, Start, Options, Name, Sometimes, Timeout, Scenario, Params, S0) ->
+qc_prop1(false, Start, Options, Name, _Sometimes, Timeout, Scenario, Params, S0) ->
     ?FORALL(Cmds, more_commands(3,commands(THIS,S0)),
-            ?SOMETIMES(Sometimes,
+            ?SOMETIMES(_Sometimes,
                        ?TIMEOUT(Timeout,
                                 begin
                                     %% setup
@@ -175,15 +175,15 @@ qc_prop1(false, Start, Options, Name, Sometimes, Timeout, Scenario, Params, S0) 
                                                          %% teardown
                                                          andalso ok =:= teardown(TestRef,S))))
                                 end)));
-qc_prop1(true, Start, Options, Name, Sometimes, Timeout, Scenario, Params, S0) ->
+qc_prop1(true, Start, Options, Name, _Sometimes, Timeout, Scenario, Params, S0) ->
     %% Number of attempts to make each test case fail. When searching
     %% for a failing example, we run each test once. When searching
     %% for a way to shrink a test case, we run each candidate
     %% shrinking 100 times.
-    ?FORALL(Attempts,?SHRINK(1,[100]),
+    ?FORALL(_Attempts,?SHRINK(1,[100]),
             ?FORALL(Cmds, parallel_commands(THIS,S0),
-                    ?ALWAYS(Attempts,
-                            ?SOMETIMES(Sometimes,
+                    ?ALWAYS(_Attempts,
+                            ?SOMETIMES(_Sometimes,
                                        ?TIMEOUT(Timeout,
                                                 begin
                                                     %% setup
