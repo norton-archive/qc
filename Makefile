@@ -1,8 +1,8 @@
 
 REBAR?=./rebar
 
-.PHONY: all clean deps compile xref doc test eunit eqc proper triq \
-	compile-for-eunit compile-for-eqc compile-for-proper compile-for-triq
+.PHONY: all clean deps compile xref doc test eunit eqc eqcmini proper triq \
+	compile-for-eunit compile-for-eqc compile-for-eqcmini compile-for-proper compile-for-triq
 
 all: compile
 
@@ -31,6 +31,9 @@ eunit: compile-for-eunit
 eqc: compile-for-eqc
 	$(REBAR) eqc skip_deps=true
 
+eqcmini: compile-for-eqcmini
+	$(REBAR) eqc skip_deps=true
+
 proper: compile-for-proper
 	@echo "rebar does not implement a 'proper' command" && false
 
@@ -42,6 +45,9 @@ compile-for-eunit:
 
 compile-for-eqc:
 	$(REBAR) -D QC -D QC_EQC compile eqc compile_only=true
+
+compile-for-eqcmini:
+	$(REBAR) -D QC -D QC_EQCMINI compile eqc compile_only=true
 
 compile-for-proper:
 	$(REBAR) -D QC -D QC_PROPER compile eqc compile_only=true

@@ -24,5 +24,9 @@
 
 -import(qc_gen, [ulist/1]).
 
+-ifdef(TRIQ).
+-import(qc_gen, [largeint/0]).
+-endif.
+
 -endif. %% -ifdef(qc).
 

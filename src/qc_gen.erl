@@ -35,6 +35,13 @@
 %%%
 
 %%%%%%
+%% largeint/0
+-ifdef(TRIQ).
+largeint() ->
+    int().
+-endif.
+
+%%%%%%
 %% ulist
 ulist(G) ->
     ?LET(Xs, list(G), Xs -- (Xs -- lists:usort(Xs))).

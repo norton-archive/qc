@@ -23,6 +23,8 @@
 
 -include("qc_impl.hrl").
 
+-ifdef(QC_STATEM).
+
 %% API
 -export([qc_run/2]).
 -export([qc_sample/1]).
@@ -310,5 +312,7 @@ counterexample_open(FileName) ->
 counterexample_close(IoDev) ->
     ok = file:close(IoDev),
     ok.
+
+-endif. %% -ifdef(QC_STATEM).
 
 -endif. %% -ifdef(QC).

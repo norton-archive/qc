@@ -21,6 +21,11 @@
 
 -ifdef(QC).
 
+%% @NOTE For boilerplate exports, see "qc_statem.hrl"
+-include("qc_statem.hrl").
+
+-ifdef(QC_STATEM).
+
 %% API
 -export([qc_run/2]).
 -export([qc_sample/1]).
@@ -50,10 +55,6 @@
          , info/2
          , tab2list/1
         ]).
-
-%% @NOTE For boilerplate exports, see "qc_statem.hrl"
--include("qc_statem.hrl").
-
 
 %%%----------------------------------------------------------------------
 %%% defines, types, records
@@ -421,5 +422,7 @@ info(Tab, Item) ->
 
 tab2list(Tab) ->
     catch ets:tab2list(Tab).
+
+-endif. %% -ifdef(QC_STATEM).
 
 -endif. %% -ifdef(QC).

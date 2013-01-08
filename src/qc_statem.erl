@@ -23,6 +23,8 @@
 
 -include("qc_statem.hrl").
 
+-ifdef(QC_STATEM).
+
 %% API
 -export([qc_run/3]).
 -export([qc_sample/2]).
@@ -103,5 +105,7 @@ qc_counterexample_write(FileName, CounterExample) ->
 %%%----------------------------------------------------------------------
 impl(Mod) ->
     qc_statem_impl:new(Mod).
+
+-endif. %% -ifdef(QC_STATEM).
 
 -endif. %% -ifdef(QC).

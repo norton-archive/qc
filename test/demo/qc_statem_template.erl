@@ -21,6 +21,11 @@
 
 -ifdef(QC).
 
+%% @NOTE For boilerplate exports, see "qc_statem.hrl"
+-include("qc_statem.hrl").
+
+-ifdef(QC_STATEM).
+
 %% API
 -export([qc_run/2]).
 -export([qc_sample/1]).
@@ -36,10 +41,6 @@
 -export([setup/0, setup/1, teardown/1, teardown/2, aggregate/1]).
 
 %% DEBUG -compile(export_all).
-
-%% @NOTE For boilerplate exports, see "qc_statem.hrl"
--include("qc_statem.hrl").
-
 
 %%%----------------------------------------------------------------------
 %%% defines, types, records
@@ -117,12 +118,10 @@ setup() ->
 
 -spec setup(term()) -> {ok, term()}.
 setup(_Scenario) ->
-    %%teardown_table(?TAB),
     {ok, unused}.
 
 -spec teardown(term()) -> ok.
 teardown(unused) ->
-    %%teardown_table(?TAB),
     ok.
 
 -spec teardown(term(), #state{}) -> ok.
@@ -153,5 +152,7 @@ filter_reply(_) ->
 %%%----------------------------------------------------------------------
 %%% Internal - Implementation
 %%%----------------------------------------------------------------------
+
+-endif. %% -ifdef(QC_STATEM).
 
 -endif. %% -ifdef(QC).

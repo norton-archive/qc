@@ -35,17 +35,33 @@
 -ifdef(PROPER).
 %% @doc PropER has a different API than EQC
 module(Options, Module) ->
-    proper:module(Module, Options).
+    ?QC:module(Module, Options).
 
 %% @doc PropER doesn\'t have a server.  Always return true.
 start() ->
     true.
 -endif. %% -ifdef(PROPER).
 
+-ifdef(TRIQ).
+%% @doc Triq has a different API than EQC
+module(_Options, Module) ->
+    ?QC:module(Module).
+
+%% @doc Triq doesn\'t have a server.  Always return true.
+start() ->
+    true.
+-endif. %% -ifdef(TRIQ).
+
 -ifdef(EQC).
+-ifndef(QC_EQCMINI).
 %% @doc Same API as EQC
 module(Options, Module) ->
-    eqc:module(Options, Module).
+    ?QC:module(Options, Module).
+-else.
+%% @doc Same API as EQC
+module(Options, Module) ->
+    error(badarg, [Options, Module]).
+-endif.
 
 %% @doc Starts (and possibly restarts) the QuickCheck server. If
 %% another instance is not running, start the server and return the
@@ -63,12 +79,17 @@ start() ->
 -endif. %% -ifdef(EQC).
 
 %% @doc Disable QuickCheck\'s test output (i.e. the "dots")
+-ifndef(TRIQ).
 silent(Prop) ->
-    on_output(silent_printer(), Prop).
+    ?QC:on_output(silent_printer(), Prop).
 
 silent_printer() ->
     Filter = fun($.) -> false; (_) -> true end,
     fun(Fmt, Args) -> io:format(lists:filter(Filter,Fmt), Args), ok end.
+-else.
+silent(Prop) ->
+    error(badarg, [Prop]).
+-endif.
 
 %% @doc Write failing counterexamples for specified Module
 write_counterexamples(Module) ->
@@ -82,10 +103,20 @@ write_counterexamples(Module, CounterExamples, LocalTime) ->
     [ write_counterexample(Module, Prop, CE, LocalTime) || {{_Mod,Prop,_Arity}, CE} <- CounterExamples ].
 -endif. %% -ifdef(PROPER).
 
+-ifdef(TRIQ).
+write_counterexamples(Module, CounterExamples, LocalTime) ->
+    [ write_counterexample(Module, Prop, CE, LocalTime) || {Prop, CE} <- CounterExamples ].
+-endif. %% -ifdef(TRIQ).
+
 -ifdef(EQC).
 write_counterexamples(Module, CounterExamples, LocalTime) ->
     [ write_counterexample(Module, Prop, CE, LocalTime) || {Prop, CE} <- CounterExamples ].
 -endif. %% -ifdef(EQC).
+
+-ifdef(EQCMINI).
+write_counterexamples(Module, CounterExamples, LocalTime) ->
+    [ write_counterexample(Module, Prop, CE, LocalTime) || {Prop, CE} <- CounterExamples ].
+-endif. %% -ifdef(EQCMINI).
 
 write_counterexample(Module, Prop, CounterExample) ->
     write_counterexample(Module, Prop, CounterExample, calendar:local_time()).
@@ -126,7 +157,19 @@ eunit_run(Module, NumTests) ->
     module([{numtests,NumTests}, noshrink, {on_output,silent_printer()}], Module).
 -endif. %% -ifdef(PROPER).
 
+-ifdef(TRIQ).
+eunit_run(Module, _NumTests) ->
+    erlang:group_leader(whereis(user), self()),
+    module([], Module).
+-endif. %% -ifdef(TRIQ).
+
 -ifdef(EQC).
+eunit_run(Module, NumTests) ->
+    erlang:group_leader(whereis(user), self()),
+    module([{numtests,NumTests}, fun ?QC_GEN:noshrink/1, {on_output,silent_printer()}], Module).
+-endif. %% -ifdef(EQC).
+
+-ifdef(EQCMINI).
 eunit_run(Module, NumTests) ->
     erlang:group_leader(whereis(user), self()),
     module([{numtests,NumTests}, fun ?QC_GEN:noshrink/1, {on_output,silent_printer()}], Module).

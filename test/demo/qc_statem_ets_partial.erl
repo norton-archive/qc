@@ -21,6 +21,11 @@
 
 -ifdef(QC).
 
+%% @NOTE For boilerplate exports, see "qc_statem.hrl"
+-include("qc_statem.hrl").
+
+-ifdef(QC_STATEM).
+
 %% API
 -export([qc_run/2]).
 -export([qc_sample/1]).
@@ -41,10 +46,6 @@
          lookup/2,
          next/2
         ]).
-
-%% @NOTE For boilerplate exports, see "qc_statem.hrl"
--include("qc_statem.hrl").
-
 
 %%%----------------------------------------------------------------------
 %%% defines, types, records
@@ -239,5 +240,7 @@ lookup(Tab, Key) ->
 
 next(Tab, Key) ->
     catch ets:next(Tab, Key).
+
+-endif. %% -ifdef(QC_STATEM).
 
 -endif. %% -ifdef(QC).
