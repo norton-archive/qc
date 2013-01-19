@@ -94,7 +94,7 @@ qc_prop(Options) ->
     NewOptions = proplists:delete(timeout, proplists:delete(sometimes, proplists:delete(parallel, proplists:delete(name, Options)))),
     Params = [{parallel,Parallel}, {mod,MOD}, {options,NewOptions}],
     ?FORALL(Scenario,with_parameters(Params,scenario()),
-            ?LET(S0,initial_state(Scenario),
+            ?LET(S0,with_parameters(Params,initial_state(Scenario)),
                  qc_prop1(Parallel, Start, Options, Name, Sometimes, Timeout, Scenario, Params, S0))).
 
 %%%----------------------------------------------------------------------
