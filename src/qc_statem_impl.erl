@@ -17,7 +17,7 @@
 %%% Purpose : Wrapper Implementation for statem
 %%%-------------------------------------------------------------------
 
--module(qc_statem_impl, [MOD]).
+-module(qc_statem_impl).
 
 -ifdef(QC).
 
@@ -26,25 +26,35 @@
 -ifdef(QC_STATEM).
 
 %% API
--export([qc_run/2]).
--export([qc_sample/1]).
--export([qc_prop/1]).
+-export([new/1]).
+-export([qc_run/3]).
+-export([qc_sample/2]).
+-export([qc_prop/2]).
 
 %% eqc_statem Callbacks
--export([command/1, next_state/3, precondition/2, postcondition/3]).
+-export([command/2, next_state/4, precondition/3, postcondition/4]).
 
 %%%----------------------------------------------------------------------
 %%% types and records
 %%%----------------------------------------------------------------------
+
+-record(?MODULE, {mod :: module()}).
+
+-type impl() :: #?MODULE{}.
 
 -type proplist() :: [atom() | {atom(), term()}].
 
 %%%----------------------------------------------------------------------
 %%% API
 %%%----------------------------------------------------------------------
--spec qc_run(non_neg_integer(), [{name,string()} | cover | {cover,[module()]} | parallel | noshrink | {sometimes,pos_integer()} | {timeout,timeout()} | any()]) -> boolean().
-qc_run(NumTests, Options) ->
-    Name = proplists:get_value(name, Options, name()),
+
+-spec new(module()) -> impl().
+new(Mod) ->
+    #?MODULE{mod=Mod}.
+
+-spec qc_run(non_neg_integer(), [{name,string()} | cover | {cover,[module()]} | parallel | noshrink | {sometimes,pos_integer()} | {timeout,timeout()} | any()], impl()) -> boolean().
+qc_run(NumTests, Options, #?MODULE{mod=MOD}=THIS) ->
+    Name = proplists:get_value(name, Options, name(MOD)),
     Cover = proplists:get_value(cover, Options, false),
     if is_list(Cover) ->
             cover_setup(Cover);
@@ -58,10 +68,10 @@ qc_run(NumTests, Options) ->
         Options2 = proplists:delete(cover, Options1),
         case proplists:get_bool(noshrink, Options2) of
             false ->
-                ?QC:quickcheck(numtests(NumTests, qc_prop(Options2)));
+                ?QC:quickcheck(numtests(NumTests, qc_prop(Options2,THIS)));
             true ->
                 Options3 = proplists:delete(noshrink, Options2),
-                ?QC:quickcheck(numtests(NumTests, noshrink(qc_prop(Options3))))
+                ?QC:quickcheck(numtests(NumTests, noshrink(qc_prop(Options3,THIS))))
         end
     after
         if
@@ -74,19 +84,19 @@ qc_run(NumTests, Options) ->
         end
     end.
 
--spec qc_sample(proplist()) -> any().
-qc_sample(Options) ->
+-spec qc_sample(proplist(), impl()) -> any().
+qc_sample(Options, #?MODULE{mod=MOD}=THIS) ->
     %% sample
     Params = [{mod,MOD},{options,Options}],
-    ?QC_GEN:sample(?FORALL(Scenario,with_parameters(Params,scenario()),
-                           ?LET(S0,initial_state(Scenario),
-                                command(S0)))).
+    ?QC_GEN:sample(?FORALL(Scenario,with_parameters(Params,scenario(THIS)),
+                           ?LET(S0,initial_state(Scenario,THIS),
+                                command(S0,THIS)))).
 
--spec qc_prop(proplist()) -> any().
-qc_prop(Options) ->
+-spec qc_prop(proplist(), impl()) -> any().
+qc_prop(Options, #?MODULE{mod=MOD}=THIS) ->
     %% setup
     Start = erlang:now(),
-    ok = setup(),
+    ok = setup(THIS),
 
     %% loop
     Name = proplists:get_value(name, Options, MOD),
@@ -95,68 +105,68 @@ qc_prop(Options) ->
     Timeout = proplists:get_value(timeout, Options, 10000),
     NewOptions = proplists:delete(timeout, proplists:delete(sometimes, proplists:delete(parallel, proplists:delete(name, Options)))),
     Params = [{parallel,Parallel}, {mod,MOD}, {options,NewOptions}],
-    ?FORALL(Scenario,with_parameters(Params,scenario()),
-            ?LET(S0,with_parameters(Params,initial_state(Scenario)),
-                 qc_prop1(Parallel, Start, Options, Name, Sometimes, Timeout, Scenario, Params, S0))).
+    ?FORALL(Scenario,with_parameters(Params,scenario(THIS)),
+            ?LET(S0,with_parameters(Params,initial_state(Scenario,THIS)),
+                 qc_prop1(Parallel, Start, Options, Name, Sometimes, Timeout, Scenario, Params, S0, THIS))).
 
 %%%----------------------------------------------------------------------
 %%% Callbacks - eqc_statem
 %%%----------------------------------------------------------------------
 
 %% scenario generator
-scenario() ->
+scenario(#?MODULE{mod=MOD}) ->
     MOD:scenario_gen().
 
 %% command generator
-command(S) ->
+command(S,#?MODULE{mod=MOD}) ->
     MOD:command_gen(S).
 
 %% initial state
-initial_state(Scenario) ->
+initial_state(Scenario,#?MODULE{mod=MOD}) ->
     MOD:initial_state(Scenario).
 
 %% state is sane
-state_is_sane(S) ->
+state_is_sane(S,#?MODULE{mod=MOD}) ->
     MOD:state_is_sane(S).
 
 %% next state
-next_state(S,R,C) ->
+next_state(S,R,C,#?MODULE{mod=MOD}) ->
     MOD:next_state(S,R,C).
 
 %% precondition
-precondition(S,C) ->
+precondition(S,C,#?MODULE{mod=MOD}) ->
     MOD:precondition(S,C).
 
 %% postcondition
-postcondition(S,C,R) ->
+postcondition(S,C,R,#?MODULE{mod=MOD}) ->
     MOD:postcondition(S,C,R).
 
 %% setup
-setup() ->
+setup(#?MODULE{mod=MOD}) ->
     MOD:setup().
 
 %% setup
-setup(Scenario) ->
+setup(Scenario,#?MODULE{mod=MOD}) ->
     MOD:setup(Scenario).
 
 %% teardown
-teardown(Ref, State) ->
-    MOD:teardown(Ref, State).
+teardown(Ref,State,#?MODULE{mod=MOD}) ->
+    MOD:teardown(Ref,State).
 
 %% aggregate
-aggregate(L) ->
+aggregate_(L,#?MODULE{mod=MOD}) ->
     MOD:aggregate(L).
 
 %%%----------------------------------------------------------------------
 %%% Internal
 %%%----------------------------------------------------------------------
-qc_prop1(false, Start, Options, Name, _Sometimes, Timeout, Scenario, Params, S0) ->
+qc_prop1(false, Start, Options, Name, _Sometimes, Timeout, Scenario, Params, S0, #?MODULE{}=THIS) ->
     ?FORALL(Cmds, more_commands(3,commands(THIS,S0)),
             ?SOMETIMES(_Sometimes,
                        ?TIMEOUT(Timeout,
                                 begin
                                     %% setup
-                                    {ok,TestRef} = setup(Scenario),
+                                    {ok,TestRef} = setup(Scenario,THIS),
 
                                     %% run
                                     {H,S,Res} = run_commands(THIS,Cmds,Params),
@@ -167,17 +177,17 @@ qc_prop1(false, Start, Options, Name, _Sometimes, Timeout, Scenario, Params, S0)
                                     CmdsH = lists:reverse(RevCmdsH),
 
                                     %% sane
-                                    Sane = state_is_sane(S),
+                                    Sane = state_is_sane(S,THIS),
 
                                     %% whenfail
-                                    ?WHENFAIL(qc_prop_sequential_whenfail(Start, Options, Name, Scenario, Cmds, CmdsH, S, Res, Sane),
-                                              aggregate(aggregate(CmdsH),
+                                    ?WHENFAIL(qc_prop_sequential_whenfail(Start, Options, Name, Scenario, Cmds, CmdsH, S, Res, Sane, THIS),
+                                              aggregate(aggregate_(CmdsH,THIS),
                                                         (ok =:= Res
                                                          andalso Sane
                                                          %% teardown
-                                                         andalso ok =:= teardown(TestRef,S))))
+                                                         andalso ok =:= teardown(TestRef,S,THIS))))
                                 end)));
-qc_prop1(true, Start, Options, Name, _Sometimes, Timeout, Scenario, Params, S0) ->
+qc_prop1(true, Start, Options, Name, _Sometimes, Timeout, Scenario, Params, S0, #?MODULE{}=THIS) ->
     %% Number of attempts to make each test case fail. When searching
     %% for a failing example, we run each test once. When searching
     %% for a way to shrink a test case, we run each candidate
@@ -189,20 +199,20 @@ qc_prop1(true, Start, Options, Name, _Sometimes, Timeout, Scenario, Params, S0) 
                                        ?TIMEOUT(Timeout,
                                                 begin
                                                     %% setup
-                                                    {ok,TestRef} = setup(Scenario),
+                                                    {ok,TestRef} = setup(Scenario,THIS),
 
                                                     %% run
                                                     {H,HL,Res} = run_parallel_commands(THIS,Cmds,Params),
 
                                                     %% whenfail
-                                                    ?WHENFAIL(qc_prop_parallel_whenfail(Start, Options, Name, Scenario, Cmds, H, HL, Res),
+                                                    ?WHENFAIL(qc_prop_parallel_whenfail(Start, Options, Name, Scenario, Cmds, H, HL, Res, THIS),
                                                               aggregate(command_names(Cmds),
                                                                         (ok =:= Res
                                                                          %% teardown
-                                                                         andalso ok =:= teardown(TestRef,undefined))))
+                                                                         andalso ok =:= teardown(TestRef,undefined,THIS))))
                                                 end))))).
 
-qc_prop_sequential_whenfail(Start, Options, Name, Scenario, Cmds, CmdsH, S, Res, Sane) ->
+qc_prop_sequential_whenfail(Start, Options, Name, Scenario, Cmds, CmdsH, S, Res, Sane, #?MODULE{}) ->
     Now = erlang:now(),
     FileName = counterexample_filename(Name),
     FileIoDev = counterexample_open(FileName),
@@ -245,7 +255,7 @@ qc_prop_sequential_whenfail(Start, Options, Name, Scenario, Cmds, CmdsH, S, Res,
         counterexample_close(FileIoDev)
     end.
 
-qc_prop_parallel_whenfail(Start, Options, Name, Scenario, Cmds, H, HL, Res) ->
+qc_prop_parallel_whenfail(Start, Options, Name, Scenario, Cmds, H, HL, Res, #?MODULE{}) ->
     Now = erlang:now(),
     FileName = counterexample_filename(Name),
     FileIoDev = counterexample_open(FileName),
@@ -277,7 +287,7 @@ qc_prop_parallel_whenfail(Start, Options, Name, Scenario, Cmds, H, HL, Res) ->
         counterexample_close(FileIoDev)
     end.
 
-name() ->
+name(MOD) ->
     {{Year,Month,Day},{Hour,Minute,Second}} = calendar:local_time(),
     lists:flatten(io_lib:format("~w-~4..0B~2..0B~2..0B-~2..0B~2..0B~2..0B",
                                 [MOD,Year,Month,Day,Hour,Minute,Second])).
