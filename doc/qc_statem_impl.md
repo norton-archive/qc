@@ -1,6 +1,6 @@
 
 
-#Abstract module qc_statem_impl [MOD]#
+#Module qc_statem_impl#
 * [Data Types](#types)
 * [Function Index](#index)
 * [Function Details](#functions)
@@ -14,6 +14,14 @@
 
 
 
+###<a name="type-impl">impl()</a>##
+
+
+
+<pre>impl() = #'?MODULE'{}</pre>
+
+
+
 ###<a name="type-proplist">proplist()</a>##
 
 
@@ -24,65 +32,74 @@
 ##Function Index##
 
 
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#command-1">command/1</a></td><td></td></tr><tr><td valign="top"><a href="#next_state-3">next_state/3</a></td><td></td></tr><tr><td valign="top"><a href="#postcondition-3">postcondition/3</a></td><td></td></tr><tr><td valign="top"><a href="#precondition-2">precondition/2</a></td><td></td></tr><tr><td valign="top"><a href="#qc_prop-1">qc_prop/1</a></td><td></td></tr><tr><td valign="top"><a href="#qc_run-2">qc_run/2</a></td><td></td></tr><tr><td valign="top"><a href="#qc_sample-1">qc_sample/1</a></td><td></td></tr></table>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#command-2">command/2</a></td><td></td></tr><tr><td valign="top"><a href="#new-1">new/1</a></td><td></td></tr><tr><td valign="top"><a href="#next_state-4">next_state/4</a></td><td></td></tr><tr><td valign="top"><a href="#postcondition-4">postcondition/4</a></td><td></td></tr><tr><td valign="top"><a href="#precondition-3">precondition/3</a></td><td></td></tr><tr><td valign="top"><a href="#qc_prop-2">qc_prop/2</a></td><td></td></tr><tr><td valign="top"><a href="#qc_run-3">qc_run/3</a></td><td></td></tr><tr><td valign="top"><a href="#qc_sample-2">qc_sample/2</a></td><td></td></tr></table>
 
 
 <a name="functions"></a>
 
 ##Function Details##
 
-<a name="command-1"></a>
+<a name="command-2"></a>
 
-###command/1##
-
-
-`command(S) -> any()`
-
-<a name="next_state-3"></a>
-
-###next_state/3##
+###command/2##
 
 
-`next_state(S, R, C) -> any()`
+`command(S, ?MODULE) -> any()`
 
-<a name="postcondition-3"></a>
+<a name="new-1"></a>
 
-###postcondition/3##
-
-
-`postcondition(S, C, R) -> any()`
-
-<a name="precondition-2"></a>
-
-###precondition/2##
+###new/1##
 
 
-`precondition(S, C) -> any()`
-
-<a name="qc_prop-1"></a>
-
-###qc_prop/1##
-
-
-<pre>qc_prop(Options::<a href="#type-proplist">proplist()</a>) -> any()</pre>
+<pre>new(Mod::module()) -> <a href="#type-impl">impl()</a></pre>
 <br></br>
 
 
-<a name="qc_run-2"></a>
+<a name="next_state-4"></a>
 
-###qc_run/2##
+###next_state/4##
 
 
-<pre>qc_run(NumTests::non_neg_integer(), Options::[{name, string()} | cover | {cover, [module()]} | parallel | noshrink | {sometimes, pos_integer()} | {timeout, timeout()} | any()]) -&gt; boolean()</pre>
+`next_state(S, R, C, ?MODULE) -> any()`
+
+<a name="postcondition-4"></a>
+
+###postcondition/4##
+
+
+`postcondition(S, C, R, ?MODULE) -> any()`
+
+<a name="precondition-3"></a>
+
+###precondition/3##
+
+
+`precondition(S, C, ?MODULE) -> any()`
+
+<a name="qc_prop-2"></a>
+
+###qc_prop/2##
+
+
+<pre>qc_prop(Options::<a href="#type-proplist">proplist()</a>, ?MODULE::<a href="#type-impl">impl()</a>) -> any()</pre>
 <br></br>
 
 
-<a name="qc_sample-1"></a>
+<a name="qc_run-3"></a>
 
-###qc_sample/1##
+###qc_run/3##
 
 
-<pre>qc_sample(Options::<a href="#type-proplist">proplist()</a>) -> any()</pre>
+<pre>qc_run(NumTests::non_neg_integer(), Options::[{name, string()} | cover | {cover, [module()]} | parallel | noshrink | {sometimes, pos_integer()} | {timeout, timeout()} | any()], ?MODULE::<a href="#type-impl">impl()</a>) -> boolean()</pre>
+<br></br>
+
+
+<a name="qc_sample-2"></a>
+
+###qc_sample/2##
+
+
+<pre>qc_sample(Options::<a href="#type-proplist">proplist()</a>, ?MODULE::<a href="#type-impl">impl()</a>) -> any()</pre>
 <br></br>
 
 

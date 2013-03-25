@@ -88,10 +88,10 @@ Support for Triq (<a href="http://krestenkrab.github.com/triq/">http://krestenkr
 
 
 <table width="100%" border="0" summary="list of modules">
-<tr><td><a href="https://github.com/norton/qc/blob/v1.0.0-rc2/doc/qc.md" class="module">qc</a></td></tr>
-<tr><td><a href="https://github.com/norton/qc/blob/v1.0.0-rc2/doc/qc_gen.md" class="module">qc_gen</a></td></tr>
-<tr><td><a href="https://github.com/norton/qc/blob/v1.0.0-rc2/doc/qc_gen_http.md" class="module">qc_gen_http</a></td></tr>
-<tr><td><a href="https://github.com/norton/qc/blob/v1.0.0-rc2/doc/qc_slave.md" class="module">qc_slave</a></td></tr>
-<tr><td><a href="https://github.com/norton/qc/blob/v1.0.0-rc2/doc/qc_statem.md" class="module">qc_statem</a></td></tr>
-<tr><td><a href="https://github.com/norton/qc/blob/v1.0.0-rc2/doc/qc_statem_impl.md" class="module">qc_statem_impl</a></td></tr></table>
+<tr><td><a href="https://github.com/norton/qc/blob/master/doc/qc.md" class="module">qc</a></td></tr>
+<tr><td><a href="https://github.com/norton/qc/blob/master/doc/qc_gen.md" class="module">qc_gen</a></td></tr>
+<tr><td><a href="https://github.com/norton/qc/blob/master/doc/qc_gen_http.md" class="module">qc_gen_http</a></td></tr>
+<tr><td><a href="https://github.com/norton/qc/blob/master/doc/qc_slave.md" class="module">qc_slave</a></td></tr>
+<tr><td><a href="https://github.com/norton/qc/blob/master/doc/qc_statem.md" class="module">qc_statem</a></td></tr>
+<tr><td><a href="https://github.com/norton/qc/blob/master/doc/qc_statem_impl.md" class="module">qc_statem_impl</a></td></tr></table>
 
