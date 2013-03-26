@@ -1,11 +1,11 @@
 
 
-#QC - Wrappers for QuickCheck and Proper testing tools#
-
+# QC - Wrappers for QuickCheck and Proper testing tools #
 
 Copyright (c) 2013 by Joseph Wayne Norton
 
-__Authors:__ Joseph Wayne Norton ([`norton@alum.mit.edu`](mailto:norton@alum.mit.edu)).<p>QC is an Erlang application that provides a set of wrappers for
+__Authors:__ Joseph Wayne Norton ([`norton@alum.mit.edu`](mailto:norton@alum.mit.edu)).
+<p>QC is an Erlang application that provides a set of wrappers for
 QuickCheck and Proper testing tools.</p>
 <p><em>This repository is a "work-in-progress" - please contribute if you
 find QC useful.</em></p>
@@ -84,7 +84,7 @@ Support for Triq (<a href="http://krestenkrab.github.com/triq/">http://krestenkr
 
 
 
-##Modules##
+## Modules ##
 
 
 <table width="100%" border="0" summary="list of modules">
