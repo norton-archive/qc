@@ -14,71 +14,42 @@
 %%% See the License for the specific language governing permissions and
 %%% limitations under the License.
 %%%
-%%% File    : qc_impl.hrl
+%%% File    : qc_statem_impl.hrl
 %%% Purpose : Wrapper for QuickCheck and Proper Implementations
 %%%-------------------------------------------------------------------
 
--ifndef(qc_impl).
--define(qc_impl, true).
+-ifndef(qc_statem_impl).
+-define(qc_statem_impl, true).
 
 -ifdef(QC_PROPER).
--undef(PROPER).
--define(PROPER, true).
--undef(EQC).
--undef(TRIQ).
+-define(QC_STATEM, true).
 -endif.
 
 -ifdef(QC_TRIQ).
--undef(TRIQ).
--define(TRIQ, true).
--undef(EQC).
--undef(PROPER).
+-undef(QC_STATEM). %% @TODO check compatibility
 -endif.
 
 -ifdef(QC_EQC).
--undef(EQC).
--define(EQC, true).
--undef(PROPER).
--undef(TRIQ).
+-define(QC_STATEM, true).
 -endif.
 
 -ifdef(QC_EQCMINI).
--undef(EQC).
--define(EQC, true).
--undef(PROPER).
--undef(TRIQ).
+-undef(QC_STATEM).
 -endif.
 
 -ifdef(PROPER).
--include_lib("proper/include/proper.hrl").
--undef(QC).
--define(QC, proper).
--define(QC_GEN, proper_gen).
--define(ALWAYS(_N,PROP), PROP).
--define(SOMETIMES(_N,PROP), PROP).
--undef(EQC).
--undef(TRIQ).
 -endif. %% -ifdef(PROPER).
 
 -ifdef(TRIQ).
--include_lib("triq/include/triq.hrl").
--undef(QC).
--define(QC, triq).
--define(QC_GEN, triq_dom).
--define(ALWAYS(_N,PROP), PROP).
--define(SOMETIMES(_N,PROP), PROP).
--define(SHRINK(G,_GS), G).
--undef(EQC).
--undef(PROPER).
+-ifdef(QC_STATEM).
+-include_lib("triq/include/triq_statem.hrl").
+-endif. %% -ifdef(QC_STATEM).
 -endif. %% -ifdef(TRIQ).
 
 -ifdef(EQC).
--include_lib("eqc/include/eqc.hrl").
--undef(QC).
--define(QC, eqc).
--define(QC_GEN, eqc_gen).
--undef(PROPER).
--undef(TRIQ).
+-ifdef(QC_STATEM).
+-include_lib("eqc/include/eqc_statem.hrl").
+-endif. %% -ifdef(QC_STATEM).
 -endif. %% -ifdef(EQC).
 
--endif. %% -ifdef(qc_impl).
+-endif. %% -ifdef(qc_statem_impl).

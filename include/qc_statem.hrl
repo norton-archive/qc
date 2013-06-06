@@ -22,5 +22,6 @@
 -define(qc_statem, true).
 
 -include("qc.hrl").
+-include("qc_statem_impl.hrl").
 
 -endif. %% -ifdef(qc_statem).

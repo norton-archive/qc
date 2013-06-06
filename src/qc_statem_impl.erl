@@ -23,6 +23,7 @@
 -ifdef(QC).
 
 -include("qc_impl.hrl").
+-include("qc_statem_impl.hrl").
 
 -ifdef(QC_STATEM).
 
