@@ -74,11 +74,6 @@ Documentation and Examples
 PropEr resize issue (<a href="https://github.com/manopapad/proper/issues/10">https://github.com/manopapad/proper/issues/10</a>)
 </p>
 </li>
-<li>
-<p>
-Support for Triq (<a href="http://krestenkrab.github.com/triq/">http://krestenkrab.github.com/triq/</a>)
-</p>
-</li>
 </ul>
 
 
