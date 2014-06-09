@@ -32,7 +32,6 @@
              , qc_gen_http
              , qc_slave
              , qc_statem
-             , qc_statem_impl
             ]},
   {env, []}
  ]}.
