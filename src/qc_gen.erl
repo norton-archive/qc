@@ -210,34 +210,6 @@ qc_timeout(Attrs) when is_list(Attrs) ->
 
 
 %%%%%%
-%% expires
-qc_expires() ->
-    ?LET(Timeout,qc_timeout(),qc_time:make_expires(Timeout)).
-
-qc_expires(Attrs) when is_list(Attrs) ->
-    case X = lists:usort(Attrs) of
-        [noninfinite] ->
-            ?LET(Timeout,qc_timeout(X),qc_time:make_expires(Timeout));
-        [] ->
-            qc_timeout()
-    end.
-
-
-%%%%%%
-%% timeout_or_expires
-qc_timeout_or_expires() ->
-    ?LET(Timeout,qc_timeout(),oneof([Timeout,qc_time:make_expires(Timeout)])).
-
-qc_timeout_or_expires(Attrs) when is_list(Attrs) ->
-    case X = lists:usort(Attrs) of
-        [noninfinite] ->
-            ?LET(Timeout,qc_timeout(X),oneof([Timeout,qc_time:make_expires(Timeout)]));
-        [] ->
-            qc_timeout_or_expires()
-    end.
-
-
-%%%%%%
 %% Bool
 %%
 %% syntactic sugar for bool(), true/false value could be set thru
