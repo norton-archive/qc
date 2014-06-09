@@ -37,7 +37,7 @@
 %% qc_statem Callbacks
 -behaviour(qc_statem).
 -export([command/1]).
--export([initial_state/1, next_state/3, invariant/1, precondition/2, postcondition/3]).
+-export([initial_state/0, initial_state/1, next_state/3, invariant/1, precondition/2, postcondition/3]).
 -export([init/0, init/1, stop/2, aggregate/1]).
 
 %% DEBUG -compile(export_all).
@@ -148,6 +148,10 @@ parallel_command_gen(#state{tab=Tab}=S) ->
           ++ [{call,?MODULE,first,[Tab]}]
           ++ [{call,?MODULE,next,[Tab,gen_key(S)]}]
          ).
+
+-spec initial_state() -> #state{}.
+initial_state() ->
+    initial_state([]).
 
 -spec initial_state(proplist()) -> #state{}.
 initial_state(Opts) ->

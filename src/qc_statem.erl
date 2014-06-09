@@ -40,6 +40,7 @@
 -type var() :: {var, integer()}.
 
 -callback command(SymState::term()) -> Gen::term().
+-callback initial_state() -> SymState::term().
 -callback initial_state(Options::proplist()) -> SymState::term().
 -callback next_state(SymState::term(), R::var(), C::call()) -> SymState::term().
 -callback invariant(DynState::term()) -> boolean().
@@ -57,6 +58,7 @@
 %% Define the behaviour's required mods.
 behaviour_info(callbacks) ->
     [{command,1}
+    , {initial_state,0}
     , {initial_state,1}
     , {next_state,3}
     , {invariant,1}
