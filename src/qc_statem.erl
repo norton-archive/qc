@@ -122,7 +122,7 @@ qc_sample(Mod, Opts) ->
 -spec qc_prop(module(), proplist()) -> any().
 qc_prop(Mod, Opts) ->
     %% init
-    Start = erlang:now(),
+    Start = qc_timestamp(),
     ok = Mod:init(),
     %% loop
     Name = proplists:get_value(name, Opts, Mod),
@@ -207,7 +207,7 @@ qc_prop1(Mod, Opts, Start, Name, true, _Sometimes, Timeout) ->
                                                 end))))).
 
 qc_prop_sequential_whenfail(_Mod, Opts, Start, Name, Cmds, CmdsH, S, Res, Invariant) ->
-    Now = erlang:now(),
+    Now = qc_timestamp(),
     FileName = counterexample_filename(Name),
     FileIoDev = counterexample_open(FileName),
     try
@@ -250,7 +250,7 @@ qc_prop_sequential_whenfail(_Mod, Opts, Start, Name, Cmds, CmdsH, S, Res, Invari
     end.
 
 qc_prop_parallel_whenfail(_Mod, Opts, Start, Name, Cmds, H, HL, Res) ->
-    Now = erlang:now(),
+    Now = qc_timestamp(),
     FileName = counterexample_filename(Name),
     FileIoDev = counterexample_open(FileName),
     try
@@ -306,7 +306,7 @@ cover_stop(Mods, Name) when is_list(Mods) ->
 counterexample_filename(Name) when is_tuple(Name) ->
     counterexample_filename(io_lib:format("~w", [Name]));
 counterexample_filename(Name) ->
-    {Mega, Sec, Micro} = now(),
+    {Mega, Sec, Micro} = qc_timestamp(),
     lists:flatten(io_lib:format("~s-counterexample-~B-~B-~B.erl", [Name, Mega, Sec, Micro])).
 
 counterexample_open(FileName) ->
@@ -316,6 +316,15 @@ counterexample_open(FileName) ->
 counterexample_close(IoDev) ->
     ok = file:close(IoDev),
     ok.
+
+-compile({nowarn_deprecated_function, [{erlang, now, 0}]}).
+qc_timestamp() ->
+    case erlang:function_exported(erlang, timestamp, 0) of
+        true ->
+            erlang:timestamp();
+        false ->
+            erlang:now()
+    end.
 
 -endif. %% -ifdef(QC_STATEM).
 
