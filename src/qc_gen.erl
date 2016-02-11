@@ -1,5 +1,5 @@
 %%%-------------------------------------------------------------------
-%%% Copyright (C) 2013-2014 by Joseph Wayne Norton <norton@alum.mit.edu>
+%%% Copyright (C) 2013-2016 by Joseph Wayne Norton <norton@alum.mit.edu>
 %%% Copyright (c) 2008-2012 Gemini Mobile Technologies, Inc.  All rights reserved.
 %%%
 %%% Licensed under the Apache License, Version 2.0 (the "License");
